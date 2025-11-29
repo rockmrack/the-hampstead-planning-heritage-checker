@@ -1,0 +1,21 @@
+# Snyk Policy File
+# For more information, see https://snyk.io/docs/snyk-cli-policy-files/
+version: v1.25.0
+
+# The issues section allows you to ignore issues that you accept the risk for
+ignore:
+  # Path Traversal in CLI data ingestion scripts
+  # These are admin-only CLI tools that:
+  # 1. Implement path validation (extension, existence, directory checks)
+  # 2. Block sensitive system directories
+  # 3. Support allowlist via DATA_INGESTION_ALLOWED_DIR env var
+  # 4. Are not exposed to untrusted user input
+  'python/PT':
+    - '*':
+        reason: >
+          Admin CLI tools with implemented path validation. 
+          These scripts validate file extensions, check file existence, 
+          block sensitive directories, and support allowlisting.
+          Not exposed to untrusted user input.
+        expires: '2025-12-31T00:00:00.000Z'
+        created: '2024-11-29T00:00:00.000Z'

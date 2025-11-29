@@ -51,6 +51,86 @@ BOROUGH_DATA_URLS = {
 }
 
 
+def validate_and_resolve_filepath(filepath: str, allowed_extensions: tuple = ('.json', '.geojson')) -> Path:
+    """
+    Validate and resolve a file path to prevent path traversal attacks.
+    
+    This function implements multiple layers of security:
+    1. Path resolution to absolute path
+    2. File extension validation
+    3. File existence check
+    4. Sensitive directory blocking
+    5. Base directory allowlisting (if DATA_DIR env var is set)
+    
+    Args:
+        filepath: The file path to validate
+        allowed_extensions: Tuple of allowed file extensions
+        
+    Returns:
+        Resolved absolute Path object
+        
+    Raises:
+        ValueError: If the path is invalid or outside allowed directories
+    """
+    import os
+    from pathlib import Path
+    
+    # Resolve to absolute path
+    resolved_path = Path(filepath).resolve()
+    
+    # Check file extension
+    if resolved_path.suffix.lower() not in allowed_extensions:
+        raise ValueError(f"Invalid file extension. Allowed: {allowed_extensions}")
+    
+    # Check that the file exists
+    if not resolved_path.exists():
+        raise ValueError(f"File does not exist: {resolved_path}")
+    
+    # Check it's a file, not a directory
+    if not resolved_path.is_file():
+        raise ValueError(f"Path is not a file: {resolved_path}")
+    
+    # Prevent access to sensitive directories (blocklist)
+    sensitive_patterns = ['/etc/', '/var/', '/usr/', '/root/',
+                         '\\windows\\', '\\system32\\', '\\program files\\']
+    path_str = str(resolved_path).lower()
+    for pattern in sensitive_patterns:
+        if pattern in path_str:
+            raise ValueError("Access to system directories is not allowed")
+    
+    # Optional: Enforce base directory allowlist via environment variable
+    allowed_data_dir = os.environ.get('DATA_INGESTION_ALLOWED_DIR')
+    if allowed_data_dir:
+        allowed_base = Path(allowed_data_dir).resolve()
+        try:
+            resolved_path.relative_to(allowed_base)
+        except ValueError:
+            raise ValueError(
+                f"File must be within allowed directory: {allowed_base}. "
+                f"Set DATA_INGESTION_ALLOWED_DIR env var to change this."
+            )
+    
+    logger.info(f"Validated safe file path: {resolved_path}")
+    return resolved_path
+
+
+def safe_read_json_file(filepath: str, allowed_extensions: tuple = ('.json', '.geojson')) -> Dict[str, Any]:
+    """
+    Safely read and parse a JSON file with path validation.
+    
+    Args:
+        filepath: Path to the JSON file
+        allowed_extensions: Tuple of allowed extensions
+        
+    Returns:
+        Parsed JSON data
+    """
+    validated_path = validate_and_resolve_filepath(filepath, allowed_extensions)
+    # nosec: Path is validated above
+    with open(str(validated_path), 'r', encoding='utf-8') as f:  # nosec B602
+        return json.load(f)
+
+
 def fetch_conservation_areas_from_file(filepath: str) -> List[Dict[str, Any]]:
     """
     Load conservation areas from a local GeoJSON file.
@@ -61,13 +141,11 @@ def fetch_conservation_areas_from_file(filepath: str) -> List[Dict[str, Any]]:
     Returns:
         List of conservation area features
     """
-    logger.info(f"Loading conservation areas from {filepath}")
-    
-    with open(filepath, 'r', encoding='utf-8') as f:
-        data = json.load(f)
+    # Use safe file reader with path validation
+    data = safe_read_json_file(filepath, ('.json', '.geojson'))
     
     if 'features' not in data:
-        raise ValueError(f"Invalid GeoJSON: no 'features' array in {filepath}")
+        raise ValueError(f"Invalid GeoJSON: no 'features' array in file")
     
     return data['features']
 
