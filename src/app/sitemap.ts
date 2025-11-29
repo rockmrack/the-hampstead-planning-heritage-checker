@@ -4,6 +4,7 @@
  */
 
 import { MetadataRoute } from 'next';
+import { getAllStreetSlugs } from '@/lib/data/streets';
 
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://hampsteadplanning.co.uk';
 
@@ -142,5 +143,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...mainPages, ...conservationPages, ...areaPages];
+  // Street pages
+  const streetPages: MetadataRoute.Sitemap = getAllStreetSlugs().map((slug) => ({
+    url: `${BASE_URL}/street/${slug}`,
+    lastModified: currentDate,
+    changeFrequency: 'weekly' as const,
+    priority: 0.8,
+  }));
+
+  return [...mainPages, ...conservationPages, ...areaPages, ...streetPages];
 }
