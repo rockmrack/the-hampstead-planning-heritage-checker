@@ -99,7 +99,7 @@ export default function HeritageMap({
       });
 
       // Handle errors
-      map.current.on('error', (e) => {
+      map.current.on('error', (e: mapboxgl.ErrorEvent) => {
         console.error('Map error:', e);
         setError('Map failed to load. Please refresh the page.');
       });
@@ -167,7 +167,7 @@ export default function HeritageMap({
 
       // Add click handler
       if (interactive) {
-        map.current.on('click', 'conservation-areas-fill', (e) => {
+        map.current.on('click', 'conservation-areas-fill', (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
           if (e.features && e.features[0]) {
             const props = e.features[0].properties;
             onMarkerClick?.('conservation', props?.id);

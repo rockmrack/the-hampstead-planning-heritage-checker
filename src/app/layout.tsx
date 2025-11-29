@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Inter, Playfair_Display } from 'next/font/google';
+import Script from 'next/script';
 
 import '@/styles/globals.css';
 import { Header, Footer } from '@/components/layout';
@@ -15,6 +16,109 @@ const playfair = Playfair_Display({
   variable: '--font-playfair',
   display: 'swap',
 });
+
+/**
+ * JSON-LD Structured Data for Organization and WebSite
+ */
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Organization',
+      '@id': 'https://hampsteadrenovations.com/#organization',
+      name: 'Hampstead Renovations',
+      url: 'https://hampsteadrenovations.com',
+      logo: {
+        '@type': 'ImageObject',
+        url: 'https://hampsteadrenovations.com/logo.png',
+        width: 512,
+        height: 512,
+      },
+      sameAs: [
+        'https://www.facebook.com/hampsteadrenovations',
+        'https://www.instagram.com/hampsteadrenovations',
+        'https://www.linkedin.com/company/hampstead-renovations',
+      ],
+      contactPoint: {
+        '@type': 'ContactPoint',
+        telephone: '+44-20-XXXX-XXXX',
+        contactType: 'customer service',
+        areaServed: 'GB',
+        availableLanguage: 'English',
+      },
+    },
+    {
+      '@type': 'WebSite',
+      '@id': 'https://hampsteadrenovations.com/#website',
+      url: 'https://hampsteadrenovations.com',
+      name: 'Heritage & Planning Checker | Hampstead Renovations',
+      description: 'Check if your property is Listed or in a Conservation Area. Instant heritage and planning status for North West London properties.',
+      publisher: {
+        '@id': 'https://hampsteadrenovations.com/#organization',
+      },
+      potentialAction: {
+        '@type': 'SearchAction',
+        target: {
+          '@type': 'EntryPoint',
+          urlTemplate: 'https://hampsteadrenovations.com/?address={search_term_string}',
+        },
+        'query-input': 'required name=search_term_string',
+      },
+    },
+    {
+      '@type': 'WebApplication',
+      '@id': 'https://hampsteadrenovations.com/#app',
+      name: 'Heritage & Planning Checker',
+      description: 'Free tool to check if your North West London property is Listed or in a Conservation Area',
+      applicationCategory: 'UtilityApplication',
+      operatingSystem: 'All',
+      offers: {
+        '@type': 'Offer',
+        price: '0',
+        priceCurrency: 'GBP',
+      },
+      featureList: [
+        'Listed Building Check',
+        'Conservation Area Check',
+        'Article 4 Direction Detection',
+        'Planning Permission Guidance',
+        'Interactive Heritage Map',
+        'PDF Report Generation',
+      ],
+      screenshot: 'https://hampsteadrenovations.com/og-image.png',
+    },
+    {
+      '@type': 'LocalBusiness',
+      '@id': 'https://hampsteadrenovations.com/#localbusiness',
+      name: 'Hampstead Renovations',
+      image: 'https://hampsteadrenovations.com/og-image.png',
+      '@type': 'HomeAndConstructionBusiness',
+      address: {
+        '@type': 'PostalAddress',
+        addressLocality: 'Hampstead',
+        addressRegion: 'London',
+        postalCode: 'NW3',
+        addressCountry: 'GB',
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: 51.5565,
+        longitude: -0.1781,
+      },
+      areaServed: [
+        { '@type': 'PostalAddress', postalCode: 'NW1' },
+        { '@type': 'PostalAddress', postalCode: 'NW3' },
+        { '@type': 'PostalAddress', postalCode: 'NW6' },
+        { '@type': 'PostalAddress', postalCode: 'NW8' },
+        { '@type': 'PostalAddress', postalCode: 'NW11' },
+        { '@type': 'PostalAddress', postalCode: 'N2' },
+        { '@type': 'PostalAddress', postalCode: 'N6' },
+        { '@type': 'PostalAddress', postalCode: 'N10' },
+      ],
+      priceRange: '££',
+    },
+  ],
+};
 
 export const metadata: Metadata = {
   title: {
@@ -106,6 +210,13 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${inter.variable} ${playfair.variable}`}>
+      <head>
+        <Script
+          id="json-ld"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="min-h-screen flex flex-col antialiased">
         <Header />
         <main className="flex-1">{children}</main>

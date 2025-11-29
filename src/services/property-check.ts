@@ -1,6 +1,15 @@
 /**
  * Property Check Service
- * Core business logic for checking planning constraints
+ * 
+ * Core business logic for checking planning constraints on properties in NW London.
+ * Uses PostGIS spatial queries to determine if a property is:
+ * - Within a Listed Building radius (RED status)
+ * - Inside a Conservation Area (AMBER status)
+ * - In a standard planning zone (GREEN status)
+ * 
+ * @module services/property-check
+ * @author Hampstead Renovations
+ * @version 1.0.0
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -18,8 +27,23 @@ import type {
 } from '@/types';
 
 /**
- * Main property check function
- * Performs spatial queries to determine planning status
+ * Main property check function.
+ * Performs spatial queries to determine planning status for a given location.
+ * 
+ * @param coordinates - The latitude and longitude of the property
+ * @param address - The full address string for display
+ * @param postcode - Optional postcode for additional context
+ * @returns Promise resolving to PropertyCheckResult with status and heritage details
+ * 
+ * @example
+ * ```typescript
+ * const result = await checkProperty(
+ *   { latitude: 51.5565, longitude: -0.1781 },
+ *   '10 Hampstead High Street',
+ *   'NW3 1PR'
+ * );
+ * console.log(result.status); // 'RED' | 'AMBER' | 'GREEN'
+ * ```
  */
 export async function checkProperty(
   coordinates: Coordinates,
@@ -90,8 +114,14 @@ export async function checkProperty(
 }
 
 /**
- * Check if coordinates are within radius of a Listed Building
- * Uses PostGIS ST_DWithin function
+ * Check if coordinates are within radius of a Listed Building.
+ * Uses PostGIS ST_DWithin function for efficient spatial queries.
+ * 
+ * @param coordinates - The latitude and longitude to check
+ * @returns Promise resolving to ListedBuilding if found, null otherwise
+ * @throws Never throws - errors are logged and null is returned
+ * 
+ * @internal
  */
 async function checkListedBuilding(
   coordinates: Coordinates
@@ -190,8 +220,14 @@ async function checkListedBuildingFallback(
 }
 
 /**
- * Check if coordinates fall within a Conservation Area
- * Uses PostGIS ST_Intersects function
+ * Check if coordinates fall within a Conservation Area.
+ * Uses PostGIS ST_Intersects function for point-in-polygon queries.
+ * 
+ * @param coordinates - The latitude and longitude to check
+ * @returns Promise resolving to ConservationArea if inside one, null otherwise
+ * @throws Never throws - errors are logged and null is returned
+ * 
+ * @internal
  */
 async function checkConservationArea(
   coordinates: Coordinates
@@ -253,7 +289,17 @@ async function checkConservationAreaFallback(
 }
 
 /**
- * Get expert opinion text based on property status
+ * Get expert opinion text based on property status.
+ * Returns tailored guidance based on the heritage classification.
+ * 
+ * @param result - The property check result containing status and building details
+ * @returns Expert opinion string with planning guidance
+ * 
+ * @example
+ * ```typescript
+ * const opinion = getExpertOpinion(result);
+ * // "This Grade II listed building requires Listed Building Consent..."
+ * ```
  */
 export function getExpertOpinion(result: PropertyCheckResult): string {
   if (result.status === 'RED' && result.listedBuilding) {

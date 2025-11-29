@@ -1,25 +1,36 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { streetIntelligenceService } from '@/lib/services/street-intelligence';
 import { getAllStreetSlugs } from '@/lib/data/streets';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import { ArrowLeft, CheckCircle, XCircle, AlertTriangle, TrendingUp, Home, MapPin, History } from 'lucide-react';
 
+/**
+ * Street Page Props
+ */
 interface PageProps {
   params: {
     slug: string;
   };
 }
 
-export async function generateStaticParams() {
+/**
+ * Generate static params for all street pages at build time
+ * Enables ISR (Incremental Static Regeneration) for optimal performance
+ */
+export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
   const slugs = getAllStreetSlugs();
   return slugs.map((slug) => ({
     slug,
   }));
 }
 
+/**
+ * Generate metadata for SEO with dynamic street information
+ */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const streetData = await streetIntelligenceService.getStreetData(params.slug);
 
@@ -29,9 +40,128 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
+  const canonicalUrl = `https://hampsteadrenovations.com/street/${params.slug}`;
+  const { analysis } = streetData;
+
   return {
     title: `Planning Permission & Property History for ${streetData.name}, ${streetData.postcode}`,
     description: `Detailed planning history, approval rates, and property insights for ${streetData.name} in ${streetData.borough}. See what neighbors have built.`,
+    alternates: {
+      canonical: canonicalUrl,
+    },
+    openGraph: {
+      title: `${streetData.name} - Planning & Heritage Guide`,
+      description: `${analysis.approvalRate.toFixed(0)}% approval rate. Average property value £${streetData.marketData?.averageSoldPrice1Year?.toLocaleString() ?? 'N/A'}. View planning history.`,
+      url: canonicalUrl,
+      type: 'article',
+    },
+  };
+}
+
+/**
+ * Generate JSON-LD structured data for a street page
+ */
+function generateStreetJsonLd(streetData: NonNullable<Awaited<ReturnType<typeof streetIntelligenceService.getStreetData>>>, slug: string) {
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Place',
+        '@id': `https://hampsteadrenovations.com/street/${slug}#place`,
+        name: streetData.name,
+        description: `${streetData.name} is a residential street in ${streetData.borough}, ${streetData.postcode}. Known for ${streetData.localKnowledge.architecturalStyle}.`,
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: streetData.name,
+          addressLocality: streetData.borough,
+          postalCode: streetData.postcode,
+          addressCountry: 'GB',
+        },
+        geo: {
+          '@type': 'GeoCoordinates',
+          latitude: streetData.coordinates?.latitude ?? 51.55,
+          longitude: streetData.coordinates?.longitude ?? -0.17,
+        },
+        containedInPlace: {
+          '@type': 'AdministrativeArea',
+          name: streetData.borough,
+        },
+      },
+      {
+        '@type': 'Article',
+        '@id': `https://hampsteadrenovations.com/street/${slug}#article`,
+        headline: `Planning Permission & Property History for ${streetData.name}`,
+        description: `Detailed planning analysis with ${streetData.analysis.approvalRate.toFixed(0)}% approval rate across ${streetData.analysis.totalApplications} applications.`,
+        author: {
+          '@type': 'Organization',
+          name: 'Hampstead Renovations',
+        },
+        publisher: {
+          '@type': 'Organization',
+          name: 'Hampstead Renovations',
+          logo: {
+            '@type': 'ImageObject',
+            url: 'https://hampsteadrenovations.com/logo.png',
+          },
+        },
+        mainEntityOfPage: {
+          '@type': 'WebPage',
+          '@id': `https://hampsteadrenovations.com/street/${slug}`,
+        },
+        about: {
+          '@id': `https://hampsteadrenovations.com/street/${slug}#place`,
+        },
+      },
+      {
+        '@type': 'BreadcrumbList',
+        itemListElement: [
+          {
+            '@type': 'ListItem',
+            position: 1,
+            name: 'Home',
+            item: 'https://hampsteadrenovations.com',
+          },
+          {
+            '@type': 'ListItem',
+            position: 2,
+            name: 'Areas',
+            item: 'https://hampsteadrenovations.com/areas',
+          },
+          {
+            '@type': 'ListItem',
+            position: 3,
+            name: streetData.postcode,
+            item: `https://hampsteadrenovations.com/areas/${streetData.postcode.toLowerCase().replace(' ', '-')}`,
+          },
+          {
+            '@type': 'ListItem',
+            position: 4,
+            name: streetData.name,
+            item: `https://hampsteadrenovations.com/street/${slug}`,
+          },
+        ],
+      },
+      ...(streetData.marketData ? [{
+        '@type': 'Dataset',
+        '@id': `https://hampsteadrenovations.com/street/${slug}#marketdata`,
+        name: `Property Market Data for ${streetData.name}`,
+        description: `Property values and market trends for ${streetData.name}, ${streetData.postcode}`,
+        variableMeasured: [
+          {
+            '@type': 'PropertyValue',
+            name: 'Average Sold Price (1 Year)',
+            value: streetData.marketData.averageSoldPrice1Year,
+            unitCode: 'GBP',
+          },
+          {
+            '@type': 'PropertyValue',
+            name: 'Price Growth (5 Year)',
+            value: streetData.marketData.priceGrowth5Year,
+            unitCode: 'P1',
+          },
+        ],
+      }] : []),
+    ],
   };
 }
 
@@ -43,9 +173,15 @@ export default async function StreetPage({ params }: PageProps) {
   }
 
   const { analysis, marketData, localKnowledge } = streetData;
+  const jsonLd = generateStreetJsonLd(streetData, params.slug);
 
   return (
     <div className="min-h-screen bg-gray-50">
+      <Script
+        id="street-json-ld"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <Header />
       
       <main className="container mx-auto px-4 py-8">

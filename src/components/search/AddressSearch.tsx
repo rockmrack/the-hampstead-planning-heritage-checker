@@ -42,7 +42,7 @@ export default function AddressSearch({
 
   // Debounced search function
   const debouncedSearch = useCallback(
-    debounce(async (searchQuery: string) => {
+    debounce(async (searchQuery: string): Promise<void> => {
       if (searchQuery.length < SEARCH_CONFIG.autocompleteMinChars) {
         setResults([]);
         setIsOpen(false);
@@ -92,13 +92,13 @@ export default function AddressSearch({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setHighlightedIndex((prev) =>
+        setHighlightedIndex((prev: number) =>
           prev < results.length - 1 ? prev + 1 : 0
         );
         break;
       case 'ArrowUp':
         e.preventDefault();
-        setHighlightedIndex((prev) =>
+        setHighlightedIndex((prev: number) =>
           prev > 0 ? prev - 1 : results.length - 1
         );
         break;

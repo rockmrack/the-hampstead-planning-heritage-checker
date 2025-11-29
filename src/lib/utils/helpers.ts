@@ -84,15 +84,18 @@ export function generateId(): string {
 
 /**
  * Debounce function
+ * @param func - The function to debounce
+ * @param wait - The number of milliseconds to delay
+ * @returns A debounced version of the function
  */
-export function debounce<T extends (...args: unknown[]) => unknown>(
-  func: T,
+export function debounce<TArgs extends unknown[]>(
+  func: (...args: TArgs) => unknown | Promise<unknown>,
   wait: number
-): (...args: Parameters<T>) => void {
+): (...args: TArgs) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
   
-  return function executedFunction(...args: Parameters<T>) {
-    const later = () => {
+  return function executedFunction(...args: TArgs): void {
+    const later = (): void => {
       timeout = null;
       func(...args);
     };
