@@ -1,51 +1,81 @@
 /**
  * Supabase Client Configuration
- * Creates and exports Supabase client instances for browser and server use
+ * Singleton pattern for Supabase client instances
  */
 
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/database';
 
+// Environment variables with validation
 const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
 const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
 const supabaseServiceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
-// Validate required environment variables
-if (!supabaseUrl || !supabaseAnonKey) {
-  throw new Error('Missing Supabase environment variables. Check NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY');
+// Singleton instances
+let supabaseClient: SupabaseClient<Database> | null = null;
+let supabaseAdminClient: SupabaseClient<Database> | null = null;
+
+/**
+ * Validate environment at runtime
+ */
+function validateEnvironment(): void {
+  if (!supabaseUrl) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
+  }
+  if (!supabaseAnonKey) {
+    throw new Error('Missing NEXT_PUBLIC_SUPABASE_ANON_KEY environment variable');
+  }
 }
 
 /**
- * Supabase client for browser/client-side use
+ * Get the singleton Supabase client for browser/client-side use
  * Uses the anonymous key with Row Level Security (RLS)
  */
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
-  auth: {
-    persistSession: false,
-    autoRefreshToken: false,
-  },
-  db: {
-    schema: 'public',
-  },
-  global: {
-    headers: {
-      'x-client-info': 'hampstead-heritage-checker',
+export function getSupabaseClient(): SupabaseClient<Database> {
+  if (supabaseClient) {
+    return supabaseClient;
+  }
+
+  validateEnvironment();
+
+  supabaseClient = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
+    auth: {
+      persistSession: typeof window !== 'undefined',
+      autoRefreshToken: typeof window !== 'undefined',
+      detectSessionInUrl: typeof window !== 'undefined',
     },
-  },
-});
+    db: {
+      schema: 'public',
+    },
+    global: {
+      headers: {
+        'x-client-info': 'hampstead-heritage-checker',
+      },
+    },
+  });
+
+  return supabaseClient;
+}
 
 /**
- * Get Supabase admin client for server-side operations
+ * Get Supabase admin client singleton for server-side operations
  * Uses service role key to bypass RLS
  * NEVER expose this client to the browser
  */
 export function getSupabaseAdmin(): SupabaseClient<Database> {
+  // Return existing singleton
+  if (supabaseAdminClient) {
+    return supabaseAdminClient;
+  }
+
+  validateEnvironment();
+
   if (!supabaseServiceRoleKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin operations');
   }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceRoleKey, {
+  supabaseAdminClient = createClient<Database>(supabaseUrl!, supabaseServiceRoleKey, {
     auth: {
       persistSession: false,
       autoRefreshToken: false,
@@ -53,20 +83,70 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
     db: {
       schema: 'public',
     },
+    global: {
+      headers: {
+        'x-client-info': 'hampstead-heritage-checker-admin',
+      },
+    },
   });
+
+  return supabaseAdminClient;
 }
+
+/**
+ * Legacy export for backward compatibility
+ * Prefer using getSupabaseClient() for new code
+ */
+export const supabase = (() => {
+  // Lazy initialization to avoid errors during module load
+  let client: SupabaseClient<Database> | null = null;
+  
+  return new Proxy({} as SupabaseClient<Database>, {
+    get(_, prop) {
+      if (!client) {
+        client = getSupabaseClient();
+      }
+      return (client as unknown as Record<string | symbol, unknown>)[prop];
+    },
+  });
+})();
 
 /**
  * Type-safe query builder for listed buildings
  */
-export const listedBuildingsTable = () => supabase.from('listed_buildings');
+export const listedBuildingsTable = () => getSupabaseClient().from('listed_buildings');
 
 /**
  * Type-safe query builder for conservation areas
  */
-export const conservationAreasTable = () => supabase.from('conservation_areas');
+export const conservationAreasTable = () => getSupabaseClient().from('conservation_areas');
 
 /**
  * Type-safe query builder for search logs
  */
-export const searchLogsTable = () => supabase.from('search_logs');
+export const searchLogsTable = () => getSupabaseClient().from('search_logs');
+
+/**
+ * Type-safe query builder for leads
+ */
+export const leadsTable = () => getSupabaseClient().from('leads');
+
+/**
+ * Check if Supabase is properly configured
+ */
+export function isSupabaseConfigured(): boolean {
+  return Boolean(supabaseUrl && supabaseAnonKey);
+}
+
+/**
+ * Check database connectivity
+ */
+export async function checkDatabaseConnection(): Promise<boolean> {
+  try {
+    const client = getSupabaseClient();
+    const { error } = await client.from('listed_buildings').select('id').limit(1);
+    return !error;
+  } catch {
+    return false;
+  }
+}

@@ -1,0 +1,595 @@
+openapi: 3.1.0
+info:
+  title: NW London Heritage & Planning Engine API
+  description: |
+    Enterprise-grade API for checking property heritage and planning status in North West London.
+    
+    ## Overview
+    This API provides instant lookup of property planning constraints including:
+    - Listed Building status (Grade I, II*, II)
+    - Conservation Area boundaries
+    - Article 4 Direction restrictions
+    
+    ## Coverage Area
+    - **Boroughs**: Camden, Barnet, Westminster, Haringey, Brent
+    - **Postcodes**: NW1-NW11, N2, N6, N10
+    
+    ## Rate Limiting
+    - Default: 60 requests per minute
+    - Rate limit headers are included in all responses
+    
+    ## Authentication
+    - Public endpoints (property check, geocoding) do not require authentication
+    - Admin endpoints require JWT authentication via NextAuth.js
+    
+  version: 1.0.0
+  contact:
+    name: Heritage Checker Support
+    email: support@hampstead-heritage.co.uk
+    url: https://hampstead-heritage.co.uk
+  license:
+    name: Proprietary
+    url: https://hampstead-heritage.co.uk/terms
+
+servers:
+  - url: https://api.hampstead-heritage.co.uk/v1
+    description: Production server
+  - url: https://staging-api.hampstead-heritage.co.uk/v1
+    description: Staging server
+  - url: http://localhost:3000/api
+    description: Local development server
+
+tags:
+  - name: Property Check
+    description: Property status lookup operations
+  - name: Geocoding
+    description: Address to coordinates conversion
+  - name: Lead Capture
+    description: Lead generation endpoints
+  - name: Health
+    description: System health and monitoring
+  - name: Admin
+    description: Administrative endpoints (authenticated)
+
+paths:
+  /check-property:
+    post:
+      tags:
+        - Property Check
+      summary: Check property heritage status
+      description: |
+        Checks if a property is a Listed Building, within a Conservation Area,
+        or in a standard planning zone. Returns detailed information about any
+        heritage constraints that apply.
+      operationId: checkProperty
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PropertyCheckRequest'
+            examples:
+              withAddress:
+                summary: Check by address
+                value:
+                  address: "10 Flask Walk, Hampstead, London"
+                  postcode: "NW3 1HE"
+              withCoordinates:
+                summary: Check by coordinates
+                value:
+                  address: "10 Flask Walk, Hampstead"
+                  coordinates:
+                    latitude: 51.5575
+                    longitude: -0.1780
+      responses:
+        '200':
+          description: Property status retrieved successfully
+          headers:
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+              description: Number of requests remaining in the current window
+            X-Request-ID:
+              schema:
+                type: string
+                format: uuid
+              description: Unique request identifier for tracing
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PropertyCheckResponse'
+              examples:
+                listedBuilding:
+                  summary: Grade II Listed Building
+                  value:
+                    success: true
+                    data:
+                      status: "RED"
+                      address: "10 Flask Walk, Hampstead, London NW3 1HE"
+                      coordinates:
+                        latitude: 51.5575
+                        longitude: -0.1780
+                      postcode: "NW3 1HE"
+                      borough: "Camden"
+                      listedBuilding:
+                        id: 1
+                        listEntryNumber: "1379518"
+                        name: "10 Flask Walk"
+                        grade: "II"
+                        hyperlink: "https://historicengland.org.uk/listing/the-list/list-entry/1379518"
+                        distanceMeters: 0
+                      conservationArea: null
+                      hasArticle4: false
+                      timestamp: "2024-01-15T10:30:00.000Z"
+                      searchId: "550e8400-e29b-41d4-a716-446655440000"
+                    timestamp: "2024-01-15T10:30:00.000Z"
+                conservationArea:
+                  summary: Conservation Area with Article 4
+                  value:
+                    success: true
+                    data:
+                      status: "AMBER"
+                      address: "25 Well Walk, Hampstead, London NW3 1BX"
+                      coordinates:
+                        latitude: 51.5590
+                        longitude: -0.1670
+                      postcode: "NW3 1BX"
+                      borough: "Camden"
+                      listedBuilding: null
+                      conservationArea:
+                        id: 1
+                        name: "Hampstead"
+                        borough: "Camden"
+                        hasArticle4: true
+                        article4Details: "Restrictions on satellite dishes, replacement windows, and front garden alterations"
+                      hasArticle4: true
+                      article4Details: "Restrictions on satellite dishes, replacement windows, and front garden alterations"
+                      timestamp: "2024-01-15T10:30:00.000Z"
+                      searchId: "550e8400-e29b-41d4-a716-446655440001"
+                    timestamp: "2024-01-15T10:30:00.000Z"
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalidAddress:
+                  value:
+                    success: false
+                    error: "Address must be at least 5 characters"
+                    errorCode: "VALIDATION_ERROR"
+                outsideCoverage:
+                  value:
+                    success: false
+                    error: "This address is outside our coverage area"
+                    errorCode: "NOT_IN_COVERAGE_AREA"
+        '404':
+          description: Address not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the rate limit resets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /geocode:
+    get:
+      tags:
+        - Geocoding
+      summary: Geocode an address
+      description: Converts an address string to coordinates using Mapbox Geocoding API
+      operationId: geocodeAddress
+      parameters:
+        - name: address
+          in: query
+          required: true
+          description: The address to geocode
+          schema:
+            type: string
+            minLength: 3
+            maxLength: 200
+          example: "Flask Walk, Hampstead"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results to return
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 10
+            default: 5
+      responses:
+        '200':
+          description: Geocoding results
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GeocodingResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /lead-capture:
+    post:
+      tags:
+        - Lead Capture
+      summary: Capture lead information
+      description: Stores lead information for CRM and triggers PDF report generation
+      operationId: captureLead
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LeadCaptureRequest'
+      responses:
+        '200':
+          description: Lead captured successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LeadCaptureResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /health:
+    get:
+      tags:
+        - Health
+      summary: Health check endpoint
+      description: Returns the current health status of the API and its dependencies
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+        '503':
+          description: Service is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /generate-report:
+    post:
+      tags:
+        - Property Check
+      summary: Generate PDF report
+      description: Generates a PDF report for a property check result (server-side)
+      operationId: generateReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportGenerationRequest'
+      responses:
+        '200':
+          description: PDF generated successfully
+          content:
+            application/pdf:
+              schema:
+                type: string
+                format: binary
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    Coordinates:
+      type: object
+      required:
+        - latitude
+        - longitude
+      properties:
+        latitude:
+          type: number
+          format: double
+          minimum: -90
+          maximum: 90
+          description: Latitude in decimal degrees
+        longitude:
+          type: number
+          format: double
+          minimum: -180
+          maximum: 180
+          description: Longitude in decimal degrees
+
+    PropertyCheckRequest:
+      type: object
+      required:
+        - address
+      properties:
+        address:
+          type: string
+          minLength: 5
+          maxLength: 200
+          description: Full address of the property
+        postcode:
+          type: string
+          pattern: '^[A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2}$'
+          description: UK postcode
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+
+    PropertyStatus:
+      type: string
+      enum:
+        - RED
+        - AMBER
+        - GREEN
+      description: |
+        Property planning status:
+        - RED: Listed Building (requires Listed Building Consent)
+        - AMBER: Conservation Area (restrictions apply)
+        - GREEN: Standard planning zone
+
+    ListedBuilding:
+      type: object
+      properties:
+        id:
+          type: integer
+        listEntryNumber:
+          type: string
+          description: Historic England list entry number
+        name:
+          type: string
+          description: Building name or address
+        grade:
+          type: string
+          enum:
+            - I
+            - II*
+            - II
+          description: Listed building grade
+        hyperlink:
+          type: string
+          format: uri
+          description: Link to Historic England listing
+        distanceMeters:
+          type: number
+          description: Distance from search point in meters
+
+    ConservationArea:
+      type: object
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+          description: Conservation area name
+        borough:
+          type: string
+          description: Local authority borough
+        hasArticle4:
+          type: boolean
+          description: Whether an Article 4 Direction applies
+        article4Details:
+          type: string
+          description: Details of Article 4 restrictions
+
+    PropertyCheckResult:
+      type: object
+      required:
+        - status
+        - address
+        - coordinates
+        - postcode
+        - hasArticle4
+        - timestamp
+        - searchId
+      properties:
+        status:
+          $ref: '#/components/schemas/PropertyStatus'
+        address:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        postcode:
+          type: string
+        borough:
+          type: string
+        listedBuilding:
+          $ref: '#/components/schemas/ListedBuilding'
+        conservationArea:
+          $ref: '#/components/schemas/ConservationArea'
+        hasArticle4:
+          type: boolean
+        article4Details:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        searchId:
+          type: string
+          format: uuid
+
+    PropertyCheckResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: '#/components/schemas/PropertyCheckResult'
+        timestamp:
+          type: string
+          format: date-time
+
+    GeocodingResult:
+      type: object
+      properties:
+        placeName:
+          type: string
+        coordinates:
+          $ref: '#/components/schemas/Coordinates'
+        postcode:
+          type: string
+        borough:
+          type: string
+        relevance:
+          type: number
+          minimum: 0
+          maximum: 1
+
+    GeocodingResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GeocodingResult'
+
+    LeadCaptureRequest:
+      type: object
+      required:
+        - email
+        - searchId
+        - source
+      properties:
+        email:
+          type: string
+          format: email
+        name:
+          type: string
+        phone:
+          type: string
+        searchId:
+          type: string
+          format: uuid
+        source:
+          type: string
+          enum:
+            - pdf_download
+            - consultation_request
+            - quote_request
+        propertyAddress:
+          type: string
+        propertyStatus:
+          $ref: '#/components/schemas/PropertyStatus'
+        marketingConsent:
+          type: boolean
+          default: false
+
+    LeadCaptureResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        message:
+          type: string
+
+    ReportGenerationRequest:
+      type: object
+      required:
+        - searchId
+        - email
+      properties:
+        searchId:
+          type: string
+          format: uuid
+        email:
+          type: string
+          format: email
+        includeMap:
+          type: boolean
+          default: true
+
+    HealthResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+        timestamp:
+          type: string
+          format: date-time
+        version:
+          type: string
+        uptime:
+          type: number
+          description: Uptime in seconds
+        checks:
+          type: object
+          properties:
+            database:
+              type: boolean
+            redis:
+              type: boolean
+            mapbox:
+              type: boolean
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          default: false
+        error:
+          type: string
+          description: Human-readable error message
+        errorCode:
+          type: string
+          enum:
+            - VALIDATION_ERROR
+            - GEOCODING_FAILED
+            - DATABASE_ERROR
+            - RATE_LIMITED
+            - NOT_IN_COVERAGE_AREA
+            - SERVER_ERROR
+          description: Machine-readable error code
+        timestamp:
+          type: string
+          format: date-time
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from NextAuth.js authentication
+
+security: []
