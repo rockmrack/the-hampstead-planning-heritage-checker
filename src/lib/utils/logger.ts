@@ -121,13 +121,13 @@ export function logError(message: string, error?: Error | unknown, meta?: Record
   const errorMeta: Record<string, unknown> = { ...requestContext, ...meta };
   
   if (error instanceof Error) {
-    errorMeta.error = {
+    errorMeta['error'] = {
       name: error.name,
       message: error.message,
       stack: error.stack,
     };
   } else if (error) {
-    errorMeta.error = String(error);
+    errorMeta['error'] = String(error);
   }
 
   logger.error(message, errorMeta);

@@ -213,10 +213,10 @@ export function isWithinCoverageArea(coordinates: Coordinates): boolean {
   const [minLng, minLat, maxLng, maxLat] = SEARCH_CONFIG.geocodingBoundingBox;
   
   return (
-    coordinates.longitude >= minLng &&
-    coordinates.longitude <= maxLng &&
-    coordinates.latitude >= minLat &&
-    coordinates.latitude <= maxLat
+    coordinates.longitude >= (minLng ?? -180) &&
+    coordinates.longitude <= (maxLng ?? 180) &&
+    coordinates.latitude >= (minLat ?? -90) &&
+    coordinates.latitude <= (maxLat ?? 90)
   );
 }
 

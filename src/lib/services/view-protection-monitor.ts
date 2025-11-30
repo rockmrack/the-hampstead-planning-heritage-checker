@@ -530,7 +530,7 @@ class ViewProtectionMonitorService {
    */
   getViewsAffectingArea(postcode: string): ProtectedView[] {
     // In production, this would use proper spatial queries
-    const district = postcode.toUpperCase().split(' ')[0];
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
     
     const areaMapping: Record<string, string[]> = {
       'NW3': ['view-001', 'view-002', 'view-003', 'view-004'],
@@ -541,8 +541,8 @@ class ViewProtectionMonitorService {
       'N8': ['view-005'],
     };
     
-    const viewIds = areaMapping[district] || [];
-    return viewIds.map(id => this.getView(id)).filter((v): v is ProtectedView => v !== undefined);
+    const viewIds = areaMapping[district] ?? [];
+    return viewIds.map((id: string) => this.getView(id)).filter((v): v is ProtectedView => v !== undefined);
   }
 }
 

@@ -318,8 +318,8 @@ class ROICalculatorService {
     customSize?: number,
     heritageStatus?: 'RED' | 'AMBER' | 'GREEN'
   ): ROICalculation {
-    const district = postcode.toUpperCase().split(' ')[0];
-    const areaData = AREA_VALUE_DATA[district] || AREA_VALUE_DATA['default'];
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
+    const areaData = AREA_VALUE_DATA[district] ?? AREA_VALUE_DATA['default']!;
     const projectCostData = PROJECT_COSTS[projectType];
     
     if (!projectCostData) {
@@ -349,19 +349,19 @@ class ROICalculatorService {
     const warnings = this.generateWarnings(projectType, costs, heritageStatus, district);
     
     // Compare alternatives
-    const alternativeProjects = this.getAlternativeProjects(propertyValue, district, projectType);
+    const alternativeProjects = this.getAlternativeProjects(propertyValue, district || '', projectType);
     
     return {
       projectType,
       propertyValue,
       propertyType,
-      area: district,
+      area: district || 'Unknown',
       costs,
       valueIncrease,
       roi,
       netGain,
       worthDoing: roi.mid > 0,
-      confidence: this.determineConfidence(projectType, district),
+      confidence: this.determineConfidence(projectType, district || ''),
       recommendations,
       warnings,
       alternativeProjects,

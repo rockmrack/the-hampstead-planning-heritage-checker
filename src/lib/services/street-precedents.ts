@@ -262,11 +262,11 @@ class StreetPrecedentService {
   // ===========================================
 
   private normalizeStreetKey(street: string, postcode: string): string {
-    return `${street.toLowerCase().replace(/\s+/g, '-')}_${postcode.split(' ')[0].toLowerCase()}`;
+    return `${street.toLowerCase().replace(/\s+/g, '-')}_${(postcode.split(' ')[0] ?? '').toLowerCase()}`;
   }
 
   private getBoroughFromPostcode(postcode: string): string {
-    const district = postcode.toUpperCase().split(' ')[0];
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
     const boroughMap: Record<string, string> = {
       'NW1': 'Camden',
       'NW2': 'Brent',
@@ -294,7 +294,7 @@ class StreetPrecedentService {
   }
 
   private getConservationArea(postcode: string): string | undefined {
-    const district = postcode.toUpperCase().split(' ')[0];
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
     const caMap: Record<string, string> = {
       'NW3': 'Hampstead Conservation Area',
       'N6': 'Highgate Conservation Area',
@@ -308,14 +308,14 @@ class StreetPrecedentService {
 
   private isArticle4Active(postcode: string): boolean {
     const article4Areas = ['NW3', 'N6', 'NW1', 'NW8'];
-    return article4Areas.includes(postcode.toUpperCase().split(' ')[0]);
+    return article4Areas.includes(postcode.toUpperCase().split(' ')[0] ?? '');
   }
 
   private groupByType(precedents: StreetPrecedent[]): Record<string, { count: number; approvalRate: number }> {
     const groups: Record<string, StreetPrecedent[]> = {};
     precedents.forEach(p => {
       if (!groups[p.applicationType]) groups[p.applicationType] = [];
-      groups[p.applicationType].push(p);
+      groups[p.applicationType]!.push(p);
     });
     
     const result: Record<string, { count: number; approvalRate: number }> = {};
@@ -508,7 +508,7 @@ class StreetPrecedentService {
     bearing = (bearing + 360) % 360;
     
     const directions = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-    return directions[Math.round(bearing / 45) % 8];
+    return directions[Math.round(bearing / 45) % 8] ?? 'N';
   }
 
   private toRad(deg: number): number {

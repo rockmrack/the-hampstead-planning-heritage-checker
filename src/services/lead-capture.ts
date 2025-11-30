@@ -14,7 +14,8 @@ export async function captureLead(data: LeadCaptureData): Promise<LeadCaptureRes
   try {
     const admin = getSupabaseAdmin();
 
-    const { error } = await admin.from('leads').insert({
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('leads') as any).insert({
       email: data.email.toLowerCase().trim(),
       name: data.name,
       phone: data.phone,
@@ -29,8 +30,8 @@ export async function captureLead(data: LeadCaptureData): Promise<LeadCaptureRes
       // Check if duplicate email
       if (error.code === '23505') {
         // Update existing lead
-        await admin
-          .from('leads')
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        await (admin.from('leads') as any)
           .update({
             search_id: data.searchId,
             source: data.source,
@@ -93,9 +94,10 @@ export async function getLeadStats() {
       .select('*', { count: 'exact', head: true });
 
     // Leads by source
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: sourceData } = await admin
       .from('leads')
-      .select('source');
+      .select('source') as { data: { source: string }[] | null };
 
     const bySource: Record<string, number> = {};
     sourceData?.forEach((lead) => {
@@ -103,9 +105,10 @@ export async function getLeadStats() {
     });
 
     // Leads by status
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: statusData } = await admin
       .from('leads')
-      .select('property_status');
+      .select('property_status') as { data: { property_status: string | null }[] | null };
 
     const byStatus: Record<PropertyStatus, number> = {
       RED: 0,
@@ -144,8 +147,8 @@ export async function markLeadConverted(email: string): Promise<boolean> {
   try {
     const admin = getSupabaseAdmin();
 
-    const { error } = await admin
-      .from('leads')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('leads') as any)
       .update({
         converted: true,
         converted_at: new Date().toISOString(),
@@ -172,19 +175,20 @@ export async function addLeadNote(email: string, note: string): Promise<boolean>
     const admin = getSupabaseAdmin();
 
     // Get existing notes
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data: existingLead } = await admin
       .from('leads')
       .select('notes')
       .eq('email', email.toLowerCase().trim())
-      .single();
+      .single() as { data: { notes: string | null } | null };
 
     const existingNotes = existingLead?.notes ?? '';
     const timestamp = new Date().toISOString();
     const newNote = `[${timestamp}] ${note}`;
     const updatedNotes = existingNotes ? `${existingNotes}\n${newNote}` : newNote;
 
-    const { error } = await admin
-      .from('leads')
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { error } = await (admin.from('leads') as any)
       .update({ notes: updatedNotes })
       .eq('email', email.toLowerCase().trim());
 

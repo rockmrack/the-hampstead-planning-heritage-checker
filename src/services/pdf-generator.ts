@@ -175,9 +175,9 @@ function addPropertyDetails(
 
   for (const [label, value] of details) {
     doc.setFont('helvetica', 'bold');
-    doc.text(label, margins.left, y);
+    doc.text(label ?? '', margins.left, y);
     doc.setFont('helvetica', 'normal');
-    doc.text(value, margins.left + 40, y);
+    doc.text(value ?? '', margins.left + 40, y);
     y += 6;
   }
 

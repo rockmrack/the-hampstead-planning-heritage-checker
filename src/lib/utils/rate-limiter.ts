@@ -29,7 +29,7 @@ function startCleanup(): void {
     const now = Date.now();
     let deleted = 0;
     
-    for (const [key, entry] of inMemoryStore.entries()) {
+    for (const [key, entry] of Array.from(inMemoryStore.entries())) {
       if (entry.resetTime < now) {
         inMemoryStore.delete(key);
         deleted++;

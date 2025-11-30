@@ -532,7 +532,7 @@ class OfficerProfilesService {
     if (officers.length === 0) return null;
     
     // Find most relevant officer
-    let relevantOfficer = officers[0];
+    let relevantOfficer = officers[0]!;
     
     if (isListedBuilding || isConservationArea) {
       const conservationOfficer = officers.find(o => 
@@ -653,9 +653,9 @@ class OfficerProfilesService {
       decisions.push({
         applicationRef: `2024/${1000 + i}/FUL`,
         address: `${10 + i} Example Street, ${officer.handlesAreas[0] || 'London'}`,
-        date: new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+        date: new Date(Date.now() - i * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0] ?? '',
         officerId: officer.id,
-        outcome: isApproved ? outcomes[Math.floor(Math.random() * 4)] : 'refused',
+        outcome: isApproved ? (outcomes[Math.floor(Math.random() * 4)] ?? 'approved') : 'refused',
         projectType,
         conservationArea: Math.random() > 0.5,
         listedBuilding: Math.random() > 0.8,

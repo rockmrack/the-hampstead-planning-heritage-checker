@@ -72,7 +72,7 @@ class MemoryCacheStore {
     const now = Date.now();
     let deleted = 0;
     
-    for (const [key, entry] of this.cache.entries()) {
+    for (const [key, entry] of Array.from(this.cache.entries())) {
       if (entry.expiry < now) {
         this.cache.delete(key);
         deleted++;
