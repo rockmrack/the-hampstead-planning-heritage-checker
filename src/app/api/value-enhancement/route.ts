@@ -129,7 +129,7 @@ function estimateValue(
   bedrooms: number,
   heritageStatus: string
 ) {
-  const outcode = postcode.split(' ')[0].toUpperCase();
+  const outcode = (postcode.split(' ')[0] ?? '').toUpperCase();
   const baseValue = AREA_VALUES[outcode] || 800;
   
   let value = baseValue * squareFootage;

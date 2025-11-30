@@ -1,23 +1,28 @@
 import '@testing-library/jest-dom';
 
+// Declare jest for TypeScript
+declare const jest: {
+  fn: <T = any>(...args: any[]) => T;
+};
+
 // Mock environment variables
-process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
-process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
-process.env.NEXT_PUBLIC_MAPBOX_TOKEN = 'test-mapbox-token';
-process.env.SUPABASE_SERVICE_ROLE_KEY = 'test-service-role-key';
+process.env['NEXT_PUBLIC_SUPABASE_URL'] = 'https://test.supabase.co';
+process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] = 'test-anon-key';
+process.env['NEXT_PUBLIC_MAPBOX_TOKEN'] = 'test-mapbox-token';
+process.env['SUPABASE_SERVICE_ROLE_KEY'] = 'test-service-role-key';
 
 // Mock fetch globally
-global.fetch = jest.fn();
+(global as any).fetch = jest.fn();
 
 // Mock ResizeObserver
-global.ResizeObserver = jest.fn().mockImplementation(() => ({
+(global as any).ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
 }));
 
 // Mock IntersectionObserver
-global.IntersectionObserver = jest.fn().mockImplementation(() => ({
+(global as any).IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
@@ -26,7 +31,7 @@ global.IntersectionObserver = jest.fn().mockImplementation(() => ({
 // Mock matchMedia
 Object.defineProperty(window, 'matchMedia', {
   writable: true,
-  value: jest.fn().mockImplementation((query) => ({
+  value: jest.fn().mockImplementation((query: string) => ({
     matches: false,
     media: query,
     onchange: null,
@@ -39,7 +44,7 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // Mock scrollTo
-window.scrollTo = jest.fn();
+(window as any).scrollTo = jest.fn();
 
 // Suppress console errors during tests (optional)
 // const originalError = console.error;

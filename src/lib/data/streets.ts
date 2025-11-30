@@ -12,6 +12,10 @@ export interface StreetDefinition {
   conservationArea?: string;
   description?: string;
   averageValue?: number;
+  coordinates?: {
+    latitude: number;
+    longitude: number;
+  };
 }
 
 export const STREETS: StreetDefinition[] = [

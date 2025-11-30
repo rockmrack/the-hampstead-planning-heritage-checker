@@ -83,6 +83,7 @@ const PART_L_REQUIREMENTS = {
     floor: 0.25,
     windows: 1.4,
     doors: 1.4,
+    airTightness: 10.0, // Less strict for existing buildings
   },
 };
 

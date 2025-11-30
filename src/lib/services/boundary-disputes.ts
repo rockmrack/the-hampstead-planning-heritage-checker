@@ -421,7 +421,7 @@ class BoundaryDisputesService {
     const featureType = request.featureType?.toLowerCase() || 'fence';
     
     // Find matching feature type
-    let feature = BOUNDARY_FEATURES['fence'];
+    let feature = BOUNDARY_FEATURES['fence']!;
     for (const [key, value] of Object.entries(BOUNDARY_FEATURES)) {
       if (featureType.includes(key)) {
         feature = value;
@@ -430,10 +430,10 @@ class BoundaryDisputesService {
     }
     
     return {
-      relevantFeature: feature.feature,
-      ownership: feature.typicalOwnership,
-      maintenance: feature.maintenanceResponsibility,
-      commonIssues: feature.commonIssues
+      relevantFeature: feature?.feature ?? 'Unknown',
+      ownership: feature?.typicalOwnership ?? 'Check title deeds',
+      maintenance: feature?.maintenanceResponsibility ?? 'Check with neighbor',
+      commonIssues: feature?.commonIssues ?? []
     };
   }
 
@@ -488,12 +488,12 @@ class BoundaryDisputesService {
     }
     
     // Default to fence dispute if nothing matches
-    const defaultScenario = COMMON_SCENARIOS['fence_dispute'];
+    const defaultScenario = COMMON_SCENARIOS['fence_dispute']!;
     return {
-      scenario: defaultScenario.scenario,
-      description: defaultScenario.description,
-      typicalResolution: defaultScenario.typicalResolution,
-      preventionTips: defaultScenario.preventionTips
+      scenario: defaultScenario?.scenario ?? 'Unknown',
+      description: defaultScenario?.description ?? 'Unknown scenario',
+      typicalResolution: defaultScenario?.typicalResolution ?? 'Seek professional advice',
+      preventionTips: defaultScenario?.preventionTips ?? []
     };
   }
 
@@ -707,16 +707,16 @@ class BoundaryDisputesService {
   }
 
   /**
-   * Get boundary features reference
+   * Get boundary features reference data
    */
-  async getBoundaryFeatures(): Promise<typeof BOUNDARY_FEATURES> {
+  async getBoundaryFeaturesReference(): Promise<typeof BOUNDARY_FEATURES> {
     return BOUNDARY_FEATURES;
   }
 
   /**
-   * Get resolution options reference
+   * Get resolution options reference data
    */
-  async getResolutionOptions(): Promise<typeof RESOLUTION_OPTIONS> {
+  async getResolutionOptionsReference(): Promise<typeof RESOLUTION_OPTIONS> {
     return RESOLUTION_OPTIONS;
   }
 }

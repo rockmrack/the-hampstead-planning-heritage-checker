@@ -783,6 +783,48 @@ Would you like to find a basement specialist or get a detailed cost estimate?`;
       'Do I need planning permission for an extension?',
     ];
   }
+  
+  /**
+   * Get suggested questions based on topic
+   */
+  getSuggestedQuestions(
+    topic?: 'listed_buildings' | 'conservation' | 'article_4' | 'permitted_development' | 'general'
+  ): string[] {
+    const questions: Record<string, string[]> = {
+      listed_buildings: [
+        'What alterations need listed building consent?',
+        'Can I replace windows in a listed building?',
+        'How do I apply for listed building consent?',
+        'What happens if I do work without consent?',
+      ],
+      conservation: [
+        'What restrictions apply in conservation areas?',
+        'Do I need permission to change my front door?',
+        'Can I install solar panels?',
+        'What design guidance should I follow?',
+      ],
+      article_4: [
+        'What rights have been removed?',
+        'Can I still extend under permitted development?',
+        'How do I find out what Article 4 covers?',
+        'When did the Article 4 direction come into force?',
+      ],
+      permitted_development: [
+        'How far can I extend without planning permission?',
+        'What are the height limits for extensions?',
+        'Can I convert my loft without permission?',
+        'Do I need prior approval for a larger home extension?',
+      ],
+      general: [
+        'Do I need planning permission for my project?',
+        'How long does planning approval take?',
+        'What are my chances of approval?',
+        'How much does planning cost?',
+      ],
+    };
+    
+    return questions[topic ?? 'general'] ?? questions['general'] ?? [];
+  }
 }
 
 // Export singleton

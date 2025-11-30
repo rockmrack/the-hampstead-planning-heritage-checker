@@ -88,11 +88,10 @@ const jsonLd = {
       screenshot: 'https://hampsteadrenovations.com/og-image.png',
     },
     {
-      '@type': 'LocalBusiness',
+      '@type': ['LocalBusiness', 'HomeAndConstructionBusiness'],
       '@id': 'https://hampsteadrenovations.com/#localbusiness',
       name: 'Hampstead Renovations',
       image: 'https://hampsteadrenovations.com/og-image.png',
-      '@type': 'HomeAndConstructionBusiness',
       address: {
         '@type': 'PostalAddress',
         addressLocality: 'Hampstead',

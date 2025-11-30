@@ -244,7 +244,7 @@ function AlertsSection({ alerts }: { alerts: DashboardAlert[] }) {
             </div>
           </div>
           <button
-            onClick={() => setDismissedAlerts(prev => new Set([...prev, alert.id]))}
+            onClick={() => setDismissedAlerts(prev => new Set(Array.from(prev).concat(alert.id)))}
             className="text-gray-400 hover:text-gray-600"
           >
             ✕

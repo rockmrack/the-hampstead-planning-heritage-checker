@@ -1,12 +1,22 @@
 /**
  * Snapshot Tests for UI Components
  * Ensures visual consistency of key components
+ * @jest-environment jsdom
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
 import React from 'react';
 import { render } from '@testing-library/react';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import ErrorBoundary from '@/components/ui/ErrorBoundary';
+
+// Declare Jest globals for TypeScript
+declare const describe: (name: string, fn: () => void) => void;
+declare const it: (name: string, fn: () => void) => void;
+declare const expect: (value: any) => any;
+declare const beforeAll: (fn: () => void) => void;
+declare const afterAll: (fn: () => void) => void;
+declare const jest: any;
 
 describe('LoadingSpinner Snapshots', () => {
   it('renders default spinner correctly', () => {

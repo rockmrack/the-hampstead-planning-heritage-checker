@@ -85,7 +85,7 @@ function getSuitableProducts(projectCost: number, heritageStatus: string, hasPla
     projectCost >= p.minLoan && projectCost <= p.maxLoan
   );
   
-  const factor = HERITAGE_FACTORS[heritageStatus] || HERITAGE_FACTORS['None'];
+  const factor = HERITAGE_FACTORS[heritageStatus] ?? HERITAGE_FACTORS['None'] ?? { ltvReduction: 0, rateIncrease: 0 };
   
   products = products.map(p => ({
     ...p,

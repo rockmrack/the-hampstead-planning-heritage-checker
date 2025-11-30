@@ -3,6 +3,24 @@
  * Generated types for Supabase database schema
  */
 
+// RPC response types
+export interface ListedBuildingProximityResult {
+  id: number;
+  list_entry_number: string;
+  name: string;
+  grade: string;
+  hyperlink: string;
+  distance_meters: number;
+}
+
+export interface ConservationAreaResult {
+  id: number;
+  name: string;
+  borough: string;
+  has_article_4: boolean;
+  article_4_details: string;
+}
+
 export interface Database {
   public: {
     Tables: {
@@ -193,33 +211,27 @@ export interface Database {
           lat: number;
           radius_meters: number;
         };
-        Returns: {
-          id: number;
-          list_entry_number: string;
-          name: string;
-          grade: string;
-          hyperlink: string;
-          distance_meters: number;
-        }[];
+        Returns: ListedBuildingProximityResult[];
       };
       check_conservation_area: {
         Args: {
           lng: number;
           lat: number;
         };
-        Returns: {
-          id: number;
-          name: string;
-          borough: string;
-          has_article_4: boolean;
-          article_4_details: string;
-        }[];
+        Returns: ConservationAreaResult[];
       };
       get_conservation_area_geojson: {
         Args: {
           area_id: number;
         };
         Returns: string;
+      };
+      exec_sql: {
+        Args: {
+          query: string;
+          params: unknown[];
+        };
+        Returns: unknown[];
       };
     };
     Enums: {

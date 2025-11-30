@@ -109,18 +109,18 @@ function calculateFeasibility(
   const scores: FeasibilityScore[] = [];
   
   // Planning Policy Score
-  let policyScore = HERITAGE_SCORES['none'];
+  let policyScore = HERITAGE_SCORES['none'] ?? 85;
   const policyNotes: string[] = [];
   const policyRisks: string[] = [];
   
   if (listedGrade) {
-    policyScore = HERITAGE_SCORES[listedGrade] || 50;
+    policyScore = HERITAGE_SCORES[listedGrade] ?? 50;
     policyRisks.push('Listed building consent required');
     policyNotes.push(`Grade ${listedGrade} listing applies strict controls`);
   }
   
   if (conservationArea) {
-    policyScore = Math.min(policyScore, HERITAGE_SCORES['conservation']);
+    policyScore = Math.min(policyScore, HERITAGE_SCORES['conservation'] ?? 65);
     policyNotes.push('Conservation area policies apply');
   }
   

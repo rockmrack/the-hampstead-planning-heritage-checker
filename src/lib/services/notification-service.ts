@@ -751,8 +751,12 @@ class NotificationService {
     // Check quiet hours
     if (prefs.quietHours.enabled && notification.priority !== 'urgent') {
       const now = new Date();
-      const [startHour, startMin] = prefs.quietHours.start.split(':').map(Number);
-      const [endHour, endMin] = prefs.quietHours.end.split(':').map(Number);
+      const startParts = prefs.quietHours.start.split(':').map(Number);
+      const endParts = prefs.quietHours.end.split(':').map(Number);
+      const startHour = startParts[0] ?? 0;
+      const startMin = startParts[1] ?? 0;
+      const endHour = endParts[0] ?? 0;
+      const endMin = endParts[1] ?? 0;
       const currentMinutes = now.getHours() * 60 + now.getMinutes();
       const startMinutes = startHour * 60 + startMin;
       const endMinutes = endHour * 60 + endMin;

@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import BuildingRegsService from '@/lib/services/building-regs-compliance';
+import buildingRegsCompliance from '@/lib/services/building-regs-compliance';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { address, projectType, projectDetails } = body;
+    const { address, postcode, projectType, projectDetails } = body;
 
     if (!address) {
       return NextResponse.json(
@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const service = new BuildingRegsService();
-    const assessment = service.assessBuildingRegsCompliance(
+    const assessment = await buildingRegsCompliance.assessBuildingRegs(
       address,
+      postcode || '',
       projectType,
       projectDetails || {}
     );
@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const address = searchParams.get('address');
+  const postcode = searchParams.get('postcode');
   const projectType = searchParams.get('projectType');
 
   if (!address) {
@@ -57,9 +58,9 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const service = new BuildingRegsService();
-    const assessment = service.assessBuildingRegsCompliance(
+    const assessment = await buildingRegsCompliance.assessBuildingRegs(
       address,
+      postcode || '',
       projectType,
       {}
     );

@@ -15,7 +15,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { STATUS_CONFIG, EXPERT_OPINIONS, SEARCH_CONFIG } from '@/lib/config';
-import { supabase, getSupabaseAdmin } from '@/lib/supabase';
+import { getSupabaseClient, getSupabaseAdmin } from '@/lib/supabase';
 import { cache, cacheKeys, cacheTTL, logSearch, logError } from '@/lib/utils';
 import type {
   Coordinates,
@@ -25,6 +25,7 @@ import type {
   ConservationArea,
   GeoJSONPoint,
 } from '@/types';
+import type { ListedBuildingProximityResult, ConservationAreaResult } from '@/types/database';
 
 /**
  * Main property check function.
@@ -128,10 +129,12 @@ async function checkListedBuilding(
 ): Promise<ListedBuilding | null> {
   const { longitude, latitude } = coordinates;
   const radiusMeters = SEARCH_CONFIG.listedBuildingRadius;
+  const supabase = getSupabaseClient();
 
   try {
     // Use the custom function for spatial query
-    const { data, error } = await supabase.rpc('check_listed_building_proximity', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('check_listed_building_proximity', {
       lng: longitude,
       lat: latitude,
       radius_meters: radiusMeters,
@@ -144,11 +147,12 @@ async function checkListedBuilding(
       return await checkListedBuildingFallback(coordinates);
     }
 
-    if (!data || data.length === 0) {
+    const results = data as unknown as ListedBuildingProximityResult[];
+    if (!results || results.length === 0) {
       return null;
     }
 
-    const building = data[0];
+    const building = results[0]!;
     return {
       id: building.id,
       listEntryNumber: building.list_entry_number,
@@ -175,6 +179,7 @@ async function checkListedBuildingFallback(
 ): Promise<ListedBuilding | null> {
   const { longitude, latitude } = coordinates;
   const radiusMeters = SEARCH_CONFIG.listedBuildingRadius;
+  const supabase = getSupabaseClient();
 
   // Raw SQL query using PostGIS
   const query = `
@@ -195,16 +200,18 @@ async function checkListedBuildingFallback(
     LIMIT 1
   `;
 
-  const { data, error } = await supabase.rpc('exec_sql', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase.rpc as any)('exec_sql', {
     query,
     params: [longitude, latitude, radiusMeters],
   });
 
-  if (error || !data || data.length === 0) {
+  const results = data as unknown as ListedBuildingProximityResult[];
+  if (error || !results || results.length === 0) {
     return null;
   }
 
-  const building = data[0];
+  const building = results[0]!;
   return {
     id: building.id,
     listEntryNumber: building.list_entry_number,
@@ -233,10 +240,12 @@ async function checkConservationArea(
   coordinates: Coordinates
 ): Promise<ConservationArea | null> {
   const { longitude, latitude } = coordinates;
+  const supabase = getSupabaseClient();
 
   try {
     // Use the custom function for spatial query
-    const { data, error } = await supabase.rpc('check_conservation_area', {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data, error } = await (supabase.rpc as any)('check_conservation_area', {
       lng: longitude,
       lat: latitude,
     });
@@ -248,11 +257,12 @@ async function checkConservationArea(
       return await checkConservationAreaFallback(coordinates);
     }
 
-    if (!data || data.length === 0) {
+    const results = data as unknown as ConservationAreaResult[];
+    if (!results || results.length === 0) {
       return null;
     }
 
-    const area = data[0];
+    const area = results[0]!;
     return {
       id: area.id,
       name: area.name,
@@ -273,6 +283,7 @@ async function checkConservationAreaFallback(
   coordinates: Coordinates
 ): Promise<ConservationArea | null> {
   const { longitude, latitude } = coordinates;
+  const supabase = getSupabaseClient();
 
   // Simple query without spatial extension
   const { data, error } = await supabase
@@ -347,7 +358,7 @@ export async function logSearchToDatabase(
       listed_building_id: result.listedBuilding?.id,
       user_agent: userAgent,
       ip_address: ipAddress,
-    });
+    } as unknown as never);
   } catch (error) {
     // Non-blocking - don't fail the main request
     logError('Failed to log search', error instanceof Error ? error : new Error(String(error)));
@@ -366,7 +377,7 @@ export async function updateSearchWithEmail(
     
     await admin
       .from('search_logs')
-      .update({ user_email: email })
+      .update({ user_email: email } as unknown as never)
       .eq('id', searchId);
   } catch (error) {
     logError('Failed to update search with email', error instanceof Error ? error : new Error(String(error)));

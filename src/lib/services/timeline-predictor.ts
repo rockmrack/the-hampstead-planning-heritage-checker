@@ -142,7 +142,7 @@ class TimelinePredictor {
   predictTimeline(factors: TimelineFactors): TimelinePrediction {
     // Get base timeline
     const applicationType = this.getApplicationType(factors);
-    const baseTimeline = BASE_TIMELINES[applicationType] || BASE_TIMELINES['householder'];
+    const baseTimeline = BASE_TIMELINES[applicationType] || BASE_TIMELINES['householder'] || {};
     
     // Apply modifiers
     const modifier = this.calculateModifier(factors);
@@ -328,7 +328,7 @@ class TimelinePredictor {
     let currentWeek = 0;
     
     // Preparation phase
-    const prepWeeks = Math.round(baseTimeline['preparation'] * modifier);
+    const prepWeeks = Math.round((baseTimeline['preparation'] ?? 4) * modifier);
     phases.push({
       name: 'Preparation & Design',
       description: 'Architectural drawings, surveys, and documentation',
@@ -341,7 +341,7 @@ class TimelinePredictor {
     currentWeek += prepWeeks;
     
     // Validation phase
-    const valWeeks = Math.round(baseTimeline['validation'] * modifier);
+    const valWeeks = Math.round((baseTimeline['validation'] ?? 2) * modifier);
     phases.push({
       name: 'Validation',
       description: 'Council checks application completeness',
@@ -383,7 +383,7 @@ class TimelinePredictor {
     }
     
     // Determination phase
-    const detWeeks = Math.round(baseTimeline['determination'] * modifier);
+    const detWeeks = Math.round((baseTimeline['determination'] ?? 8) * modifier);
     phases.push({
       name: 'Determination',
       description: 'Planning officer assessment and decision',
@@ -403,7 +403,7 @@ class TimelinePredictor {
     // Submission milestone
     milestones.push({
       name: 'Application Submission',
-      week: phases[0].endWeek,
+      week: phases[0]?.endWeek ?? 0,
       description: 'Submit complete application to council',
       isKeyDecision: true,
       action: 'Ensure all documents are ready'
@@ -412,7 +412,7 @@ class TimelinePredictor {
     // Validation milestone
     milestones.push({
       name: 'Application Validated',
-      week: phases[1].endWeek,
+      week: phases[1]?.endWeek ?? 0,
       description: 'Council confirms application is complete',
       isKeyDecision: false,
       action: 'Respond quickly to any requests for information'
@@ -570,8 +570,8 @@ class TimelinePredictor {
     if (factors.projectSize === 'large') confidence -= 0.05;
     
     // Known areas increase confidence
-    const prefix = factors.postcode.split(' ')[0];
-    if (HISTORICAL_DATA[prefix]) confidence += 0.05;
+    const prefix = factors.postcode.split(' ')[0] ?? '';
+    if (prefix && HISTORICAL_DATA[prefix]) confidence += 0.05;
     
     return Math.max(0.5, Math.min(0.95, confidence));
   }

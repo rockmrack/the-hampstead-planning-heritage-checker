@@ -1,30 +1,30 @@
 import { NextRequest, NextResponse } from 'next/server';
-import PlanningFeeCalculatorService from '@/lib/services/planning-fee-calculator';
+import planningFeeCalculator from '@/lib/services/planning-fee-calculator';
 
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { applicationType, developmentDetails, applicantDetails } = body;
+    const { address, postcode, projectType, projectDetails } = body;
 
-    if (!applicationType) {
+    if (!address) {
       return NextResponse.json(
-        { error: 'Application type is required' },
+        { error: 'Address is required' },
         { status: 400 }
       );
     }
 
-    if (!developmentDetails) {
+    if (!projectType) {
       return NextResponse.json(
-        { error: 'Development details are required' },
+        { error: 'Project type is required' },
         { status: 400 }
       );
     }
 
-    const service = new PlanningFeeCalculatorService();
-    const calculation = service.calculatePlanningFee(
-      applicationType,
-      developmentDetails,
-      applicantDetails || {}
+    const calculation = await planningFeeCalculator.calculateFees(
+      address,
+      postcode || '',
+      projectType,
+      projectDetails || {}
     );
 
     return NextResponse.json(calculation);
@@ -39,27 +39,29 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
-  const applicationType = searchParams.get('applicationType');
-  const floorArea = searchParams.get('floorArea');
-  const units = searchParams.get('units');
-  const siteArea = searchParams.get('siteArea');
+  const address = searchParams.get('address');
+  const postcode = searchParams.get('postcode');
+  const projectType = searchParams.get('projectType');
 
-  if (!applicationType) {
+  if (!address) {
     return NextResponse.json(
-      { error: 'Application type is required' },
+      { error: 'Address is required' },
+      { status: 400 }
+    );
+  }
+
+  if (!projectType) {
+    return NextResponse.json(
+      { error: 'Project type is required' },
       { status: 400 }
     );
   }
 
   try {
-    const service = new PlanningFeeCalculatorService();
-    const calculation = service.calculatePlanningFee(
-      applicationType,
-      {
-        floorArea: floorArea ? parseFloat(floorArea) : undefined,
-        numberOfUnits: units ? parseInt(units) : undefined,
-        siteArea: siteArea ? parseFloat(siteArea) : undefined
-      },
+    const calculation = await planningFeeCalculator.calculateFees(
+      address,
+      postcode || '',
+      projectType,
       {}
     );
 

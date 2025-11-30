@@ -129,7 +129,11 @@ function developStrategy(
   inConservationArea: boolean,
   hasHeritageConcerns: boolean
 ) {
-  const rates = APPEAL_SUCCESS_RATES[projectType] || APPEAL_SUCCESS_RATES['extension'];
+  const rates = APPEAL_SUCCESS_RATES[projectType] ?? APPEAL_SUCCESS_RATES['extension'] ?? {
+    written_representations: 30,
+    hearing: 25,
+    inquiry: 20
+  };
   
   let successModifier = 0;
   if (isListed) successModifier -= 15;

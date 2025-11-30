@@ -128,7 +128,7 @@ function getRequirements(
   heritageStatus: string,
   isNewBuild: boolean
 ) {
-  const heritageFactor = HERITAGE_INSURANCE[heritageStatus] || HERITAGE_INSURANCE['None'];
+  const heritageFactor = HERITAGE_INSURANCE[heritageStatus] ?? HERITAGE_INSURANCE['None'] ?? { premiumIncrease: 0, additionalCover: [] };
   
   return INSURANCE_PRODUCTS.map(product => {
     let relevance: 'essential' | 'important' | 'useful' = 'useful';

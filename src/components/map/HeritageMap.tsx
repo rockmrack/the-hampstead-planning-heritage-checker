@@ -170,16 +170,16 @@ export default function HeritageMap({
         map.current.on('click', 'conservation-areas-fill', (e: mapboxgl.MapMouseEvent & { features?: mapboxgl.MapboxGeoJSONFeature[] }) => {
           if (e.features && e.features[0]) {
             const props = e.features[0].properties;
-            onMarkerClick?.('conservation', props?.id);
+            onMarkerClick?.('conservation', props?.['id']);
 
             // Show popup
             new mapboxgl.Popup()
               .setLngLat(e.lngLat)
               .setHTML(`
                 <div class="p-2">
-                  <h3 class="font-bold text-sm">${props?.name}</h3>
-                  <p class="text-xs text-gray-600">${props?.borough}</p>
-                  ${props?.hasArticle4 ? '<p class="text-xs text-red-600 mt-1">Article 4 Direction applies</p>' : ''}
+                  <h3 class="font-bold text-sm">${props?.['name']}</h3>
+                  <p class="text-xs text-gray-600">${props?.['borough']}</p>
+                  ${props?.['hasArticle4'] ? '<p class="text-xs text-red-600 mt-1">Article 4 Direction applies</p>' : ''}
                 </div>
               `)
               .addTo(map.current!);

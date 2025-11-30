@@ -6,7 +6,7 @@
 import { MetadataRoute } from 'next';
 import { getAllStreetSlugs } from '@/lib/data/streets';
 
-const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://hampsteadplanning.co.uk';
+const BASE_URL = process.env['NEXT_PUBLIC_APP_URL'] || 'https://hampsteadplanning.co.uk';
 
 // All conservation areas in NW London
 const CONSERVATION_AREAS = [

@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     const userId = searchParams.get('userId') || 'demo-user';
     const action = searchParams.get('action') || 'list';
     const status = searchParams.get('status') as 'unread' | 'read' | 'all' | undefined;
-    const category = searchParams.get('category') as Parameters<typeof notificationService.getNotifications>[1]['category'];
+    const category = searchParams.get('category') as 'application' | 'policy' | 'deadline' | 'communication' | 'market' | 'system' | undefined;
     const limit = searchParams.get('limit') ? parseInt(searchParams.get('limit')!) : undefined;
     const offset = searchParams.get('offset') ? parseInt(searchParams.get('offset')!) : undefined;
     
