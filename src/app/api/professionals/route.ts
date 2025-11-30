@@ -5,13 +5,13 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { 
-  findProfessionals,
-  getProfessionalsBySpecialization,
+  getProfessionalsByCategory,
+  getProfessionalsForProject,
   Professional,
   ProfessionalCategory,
-  PROFESSIONAL_DIRECTORY 
+  SAMPLE_PROFESSIONALS 
 } from '@/lib/config/professionals';
-import { logger } from '@/lib/logging';
+import { logger } from '@/lib/utils/logger';
 
 export async function GET(request: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     const category = searchParams.get('category') as ProfessionalCategory | null;
     const specialization = searchParams.get('specialization');
     const borough = searchParams.get('borough');
-    const priceRange = searchParams.get('priceRange') as Professional['priceRange'] | null;
+    const heritageStatus = searchParams.get('heritageStatus') as 'RED' | 'AMBER' | 'GREEN' | null;
     const limit = parseInt(searchParams.get('limit') || '20');
 
     logger.info('Professionals search requested', {
@@ -30,24 +30,29 @@ export async function GET(request: NextRequest) {
       category,
       specialization,
       borough,
-      priceRange,
+      heritageStatus,
     });
 
     let professionals: Professional[];
 
     if (specialization) {
       // Search by specialization
-      professionals = getProfessionalsBySpecialization(specialization);
-    } else if (category || borough || priceRange) {
+      professionals = SAMPLE_PROFESSIONALS.filter(p => 
+        p.specializations.some(s => s.toLowerCase().includes(specialization.toLowerCase()))
+      );
+    } else if (category) {
+      // Search by category
+      professionals = getProfessionalsByCategory(category);
+    } else if (heritageStatus || borough) {
       // Search with filters
-      professionals = findProfessionals({
-        category: category || undefined,
-        borough: borough || undefined,
-        priceRange: priceRange || undefined,
-      });
+      professionals = getProfessionalsForProject(
+        heritageStatus || 'GREEN',
+        'general',
+        borough || undefined
+      );
     } else {
       // Return all
-      professionals = Object.values(PROFESSIONAL_DIRECTORY).flat();
+      professionals = [...SAMPLE_PROFESSIONALS];
     }
 
     // Sort by rating by default

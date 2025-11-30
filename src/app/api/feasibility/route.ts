@@ -9,8 +9,10 @@ import {
   PropertyContext, 
   ProjectSpecification 
 } from '@/lib/services/feasibility-engine';
-import { ProjectType } from '@/lib/config/project-types';
-import { logger } from '@/lib/logging';
+import { PROJECT_TYPES } from '@/lib/config/project-types';
+import { logger } from '@/lib/utils/logger';
+
+const PROJECT_TYPE_IDS = PROJECT_TYPES.map(pt => pt.id);
 
 export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -41,7 +43,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!project.projectType || !Object.values(ProjectType).includes(project.projectType)) {
+    if (!project.projectType || !PROJECT_TYPE_IDS.includes(project.projectType.id)) {
       return NextResponse.json(
         { error: 'Invalid project type' },
         { status: 400 }
@@ -91,7 +93,7 @@ export async function GET() {
     message: 'Feasibility Check API',
     version: '1.0.0',
     usage: 'POST with property and project details',
-    projectTypes: Object.values(ProjectType),
+    projectTypes: PROJECT_TYPE_IDS,
     heritageStatuses: ['RED', 'AMBER', 'GREEN'],
   });
 }

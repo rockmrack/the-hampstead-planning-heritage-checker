@@ -3,12 +3,22 @@
  * Singleton Redis client for distributed caching and rate limiting
  */
 
-import { createClient, RedisClientType } from 'redis';
-import { logger } from './logger';
+import { logger } from '../utils/logger';
 
+// Define the Redis client type 
+interface RedisClientType {
+  isReady: boolean;
+  connect(): Promise<void>;
+  quit(): Promise<void>;
+  ping(): Promise<string>;
+  on(event: string, callback: (...args: unknown[]) => void): void;
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let redisModule: any = null;
 let redisClient: RedisClientType | null = null;
 let isConnecting = false;
-let connectionPromise: Promise<RedisClientType> | null = null;
+let connectionPromise: Promise<RedisClientType | null> | null = null;
 
 /**
  * Get the Redis client singleton
@@ -35,12 +45,22 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
 
   isConnecting = true;
 
-  connectionPromise = new Promise<RedisClientType>(async (resolve, reject) => {
+  connectionPromise = (async (): Promise<RedisClientType | null> => {
     try {
-      const client = createClient({
+      // Dynamically import redis module
+      if (!redisModule) {
+        try {
+          redisModule = await import('redis');
+        } catch {
+          logger.warn('Redis module not installed, using in-memory fallback');
+          return null;
+        }
+      }
+
+      const client = redisModule.createClient({
         url: redisUrl,
         socket: {
-          reconnectStrategy: (retries) => {
+          reconnectStrategy: (retries: number) => {
             if (retries > 10) {
               logger.error('Redis max reconnection attempts reached');
               return new Error('Max reconnection attempts reached');
@@ -51,7 +71,7 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
         },
       });
 
-      client.on('error', (err) => {
+      client.on('error', (err: Error) => {
         logger.error('Redis Client Error', { error: err.message });
       });
 
@@ -70,15 +90,15 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
       await client.connect();
       redisClient = client as RedisClientType;
       isConnecting = false;
-      resolve(redisClient);
+      return redisClient;
     } catch (error) {
       isConnecting = false;
       logger.error('Failed to connect to Redis', {
         error: error instanceof Error ? error.message : String(error),
       });
-      reject(error);
+      return null;
     }
-  });
+  })();
 
   try {
     return await connectionPromise;

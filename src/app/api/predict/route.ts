@@ -10,7 +10,7 @@ import {
   getApprovalSummary,
   getRecommendedApproachText 
 } from '@/lib/services/approval-prediction';
-import { logger } from '@/lib/logging';
+import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID();

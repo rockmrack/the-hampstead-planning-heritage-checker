@@ -1,0 +1,101 @@
+﻿node.exe : 
+'Heritage' is 
+not recognized 
+as an internal 
+or external 
+command,
+At line:1 
+char:1
++ & 
+"C:\Program Fil
+es\nodejs/node.
+exe" 
+"C:\Program Fil
+es\nodejs/node_
+mo ...
++ ~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~
+~~~~~~~~~~~
+    + Category 
+   Info        
+      : NotS   
+ pecified:     
+('Heritage    
+' is n...t    
+ernal comm    
+and,:Strin    
+g) [], Rem    
+oteExcepti    
+on
+    + FullyQua 
+   lifiedErro  
+  rId : Nati   
+ veCommandE    
+rror
+ 
+operable 
+program or 
+batch file.
+node:internal/m
+odules/cjs/load
+er:1424
+  throw err;
+  ^
+
+Error: Cannot 
+find module 'C:
+\Users\rossd\On
+eDrive\typescri
+pt\bin\tsc'
+    at Module._
+resolveFilename
+ (node:internal
+/modules/cjs/lo
+ader:1421:15)
+    at defaultR
+esolveImpl (nod
+e:internal/modu
+les/cjs/loader:
+1059:19)
+    at resolveF
+orCJSWithHooks 
+(node:internal/
+modules/cjs/loa
+der:1064:22)
+    at 
+Module._load (n
+ode:internal/mo
+dules/cjs/loade
+r:1227:37)
+    at TracingC
+hannel.traceSyn
+c (node:diagnos
+tics_channel:32
+8:14)
+    at 
+wrapModuleLoad 
+(node:internal/
+modules/cjs/loa
+der:245:24)
+    at Module.e
+xecuteUserEntry
+Point [as 
+runMain] (node:
+internal/module
+s/run_main:154:
+5)
+    at node:int
+ernal/main/run_
+main_module:33:
+47 {
+  code: 'MODULE
+_NOT_FOUND',
+  
+requireStack: 
+[]
+}
+
+Node.js 
+v24.11.1

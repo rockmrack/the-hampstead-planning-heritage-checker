@@ -9,7 +9,7 @@ import {
   AlertSubscription,
   SubscriptionType 
 } from '@/lib/services/planning-alerts';
-import { logger } from '@/lib/logging';
+import { logger } from '@/lib/utils/logger';
 
 /**
  * Get user's alerts and subscriptions
