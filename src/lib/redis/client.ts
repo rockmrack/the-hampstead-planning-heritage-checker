@@ -5,13 +5,40 @@
 
 import { logger } from '../utils/logger';
 
-// Define the Redis client type 
+// Multi chain interface for Redis transactions
+interface RedisMultiChain {
+  zAdd(key: string, options: { score: number; value: string }): RedisMultiChain;
+  zRemRangeByScore(key: string, min: number, max: number): RedisMultiChain;
+  zCard(key: string): RedisMultiChain;
+  expire(key: string, seconds: number): RedisMultiChain;
+  exec(): Promise<unknown[]>;
+  // Allow other chained methods
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+}
+
+// Define the Redis client type with all methods needed
+// Using index signature to allow any Redis method
 interface RedisClientType {
   isReady: boolean;
   connect(): Promise<void>;
   quit(): Promise<void>;
   ping(): Promise<string>;
   on(event: string, callback: (...args: unknown[]) => void): void;
+  // Common Redis commands
+  get(key: string): Promise<string | null>;
+  set(key: string, value: string, options?: { EX?: number }): Promise<void>;
+  del(key: string | string[]): Promise<number>;
+  keys(pattern: string): Promise<string[]>;
+  exists(key: string): Promise<number>;
+  incr(key: string): Promise<number>;
+  expire(key: string, seconds: number): Promise<boolean>;
+  multi(): RedisMultiChain;
+  zRemRangeByScore(key: string, min: number, max: number): Promise<number>;
+  zCard(key: string): Promise<number>;
+  // Allow other methods
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -50,6 +77,7 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
       // Dynamically import redis module
       if (!redisModule) {
         try {
+          // @ts-expect-error - Redis module may not be installed
           redisModule = await import('redis');
         } catch {
           logger.warn('Redis module not installed, using in-memory fallback');

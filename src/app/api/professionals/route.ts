@@ -106,7 +106,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const allProfessionals = Object.values(PROFESSIONAL_DIRECTORY).flat();
+    const allProfessionals: Professional[] = SAMPLE_PROFESSIONALS;
     const professional = allProfessionals.find(p => p.id === id);
 
     if (!professional) {

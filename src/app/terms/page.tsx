@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import { COMPANY_INFO } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
@@ -230,9 +230,9 @@ export default function TermsOfServicePage() {
             </p>
             <address className="not-italic text-slate-600 mt-4">
               <strong>{COMPANY_INFO.name}</strong><br />
-              {COMPANY_INFO.address}<br />
-              Email: <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary-600 hover:underline">{COMPANY_INFO.email}</a><br />
-              Phone: <a href={`tel:${COMPANY_INFO.phone}`} className="text-primary-600 hover:underline">{COMPANY_INFO.phone}</a>
+              {COMPANY_INFO.address.full}<br />
+              Email: <a href={`mailto:${COMPANY_INFO.contact.email}`} className="text-primary-600 hover:underline">{COMPANY_INFO.contact.email}</a><br />
+              Phone: <a href={`tel:${COMPANY_INFO.contact.phone}`} className="text-primary-600 hover:underline">{COMPANY_INFO.contact.phone}</a>
             </address>
           </section>
 

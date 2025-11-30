@@ -387,7 +387,7 @@ export default function CanIPage() {
             </button>
 
             <ProfessionalMarketplace
-              projectType={selectedProject?.toLowerCase().replace('_', '-')}
+              projectType={selectedProject?.id?.toLowerCase().replace('_', '-')}
               borough={propertyData?.borough}
               heritageStatus={propertyData?.heritageStatus}
             />

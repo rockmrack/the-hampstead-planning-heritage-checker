@@ -151,8 +151,8 @@ export default function PrivacyPolicyPage() {
             </ul>
             <p className="text-slate-600 mt-4">
               To exercise these rights, contact us at{' '}
-              <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary-600 hover:underline">
-                {COMPANY_INFO.email}
+              <a href={`mailto:${COMPANY_INFO.contact.email}`} className="text-primary-600 hover:underline">
+                {COMPANY_INFO.contact.email}
               </a>
             </p>
           </section>
@@ -210,9 +210,9 @@ export default function PrivacyPolicyPage() {
             </p>
             <address className="not-italic text-slate-600 mt-4">
               <strong>{COMPANY_INFO.name}</strong><br />
-              {COMPANY_INFO.address}<br />
-              Email: <a href={`mailto:${COMPANY_INFO.email}`} className="text-primary-600 hover:underline">{COMPANY_INFO.email}</a><br />
-              Phone: <a href={`tel:${COMPANY_INFO.phone}`} className="text-primary-600 hover:underline">{COMPANY_INFO.phone}</a>
+              {COMPANY_INFO.address.full}<br />
+              Email: <a href={`mailto:${COMPANY_INFO.contact.email}`} className="text-primary-600 hover:underline">{COMPANY_INFO.contact.email}</a><br />
+              Phone: <a href={`tel:${COMPANY_INFO.contact.phone}`} className="text-primary-600 hover:underline">{COMPANY_INFO.contact.phone}</a>
             </address>
           </section>
 

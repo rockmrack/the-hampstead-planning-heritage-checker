@@ -111,7 +111,7 @@ export default function StatusCard({
             >
               {result.status === 'GREEN'
                 ? (config as typeof STATUS_CONFIG.GREEN).opportunity
-                : config.warning}
+                : (config as typeof STATUS_CONFIG.RED | typeof STATUS_CONFIG.AMBER).warning}
             </p>
           </div>
         </div>
