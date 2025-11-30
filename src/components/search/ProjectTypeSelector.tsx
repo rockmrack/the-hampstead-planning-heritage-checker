@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { ProjectType, getProjectTypeInfo, PROJECT_TYPE_CATEGORIES } from '@/lib/config/project-types';
+import { 
+  ProjectType, 
+  ProjectCategory,
+  getPopularProjects, 
+  PROJECT_CATEGORIES, 
+  getProjectsByCategory 
+} from '@/lib/config/project-types';
 
 interface ProjectTypeSelectorProps {
   onSelect: (projectType: ProjectType) => void;
@@ -14,43 +20,22 @@ export default function ProjectTypeSelector({
   selectedType,
   heritageStatus = 'GREEN',
 }: ProjectTypeSelectorProps) {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | null>(null);
 
-  const categories = PROJECT_TYPE_CATEGORIES;
-
-  const getCategoryIcon = (category: string): string => {
-    const icons: Record<string, string> = {
-      'extensions': '🏠',
-      'loft': '🏗️',
-      'outbuildings': '🏡',
-      'windows-doors': '🚪',
-      'roofing': '🏚️',
-      'solar-green': '☀️',
-      'external': '🌳',
-      'internal': '🔨',
-    };
-    return icons[category] || '📦';
-  };
-
-  const getHeritageWarning = (projectType: ProjectType): string | null => {
-    const info = getProjectTypeInfo(projectType);
-    if (!info) return null;
-
+  const getHeritageWarning = (_projectType: ProjectType): string | null => {
     if (heritageStatus === 'RED') {
-      if (info.heritageConsiderations?.listed === 'not-allowed') {
-        return 'Not permitted for listed buildings';
-      }
       return 'Requires Listed Building Consent';
     }
 
     if (heritageStatus === 'AMBER') {
-      if (info.heritageConsiderations?.conservationArea === 'restricted') {
-        return 'Restricted in conservation area';
-      }
       return 'May require permission in conservation area';
     }
 
     return null;
+  };
+
+  const getProjectsForCategory = (categoryId: ProjectCategory): ProjectType[] => {
+    return getProjectsByCategory(categoryId);
   };
 
   return (
@@ -64,43 +49,47 @@ export default function ProjectTypeSelector({
 
       {/* Category Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-        {Object.entries(categories).map(([key, category]) => (
-          <button
-            key={key}
-            onClick={() => setSelectedCategory(selectedCategory === key ? null : key)}
-            className={`
-              p-4 rounded-xl border-2 transition-all text-left
-              ${selectedCategory === key
-                ? 'border-blue-500 bg-blue-50 shadow-md'
-                : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow'
-              }
-            `}
-          >
-            <span className="text-2xl mb-2 block">{getCategoryIcon(key)}</span>
-            <span className="font-medium text-gray-900">{category.name}</span>
-            <span className="text-sm text-gray-500 block mt-1">
-              {category.types.length} options
-            </span>
-          </button>
-        ))}
+        {PROJECT_CATEGORIES.map((category) => {
+          const projectsInCategory = getProjectsForCategory(category.id as ProjectCategory);
+          return (
+            <button
+              key={category.id}
+              onClick={() => setSelectedCategory(
+                selectedCategory === category.id ? null : category.id as ProjectCategory
+              )}
+              className={`
+                p-4 rounded-xl border-2 transition-all text-left
+                ${selectedCategory === category.id
+                  ? 'border-blue-500 bg-blue-50 shadow-md'
+                  : 'border-gray-200 bg-white hover:border-gray-300 hover:shadow'
+                }
+              `}
+            >
+              <span className="text-2xl mb-2 block">{category.icon}</span>
+              <span className="font-medium text-gray-900">{category.name}</span>
+              <span className="text-sm text-gray-500 block mt-1">
+                {projectsInCategory.length} options
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Project Types for Selected Category */}
       {selectedCategory && (
         <div className="bg-gray-50 rounded-2xl p-6 animate-fadeIn">
           <h3 className="font-semibold text-gray-900 mb-4">
-            {categories[selectedCategory].name}
+            {PROJECT_CATEGORIES.find(c => c.id === selectedCategory)?.name ?? 'Projects'}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {categories[selectedCategory].types.map((type) => {
-              const info = getProjectTypeInfo(type);
-              const warning = getHeritageWarning(type);
-              const isSelected = selectedType === type;
+            {getProjectsForCategory(selectedCategory).map((projectType) => {
+              const warning = getHeritageWarning(projectType);
+              const isSelected = selectedType?.id === projectType.id;
 
               return (
                 <button
-                  key={type}
-                  onClick={() => onSelect(type)}
+                  key={projectType.id}
+                  onClick={() => onSelect(projectType)}
                   className={`
                     p-4 rounded-xl border-2 transition-all text-left flex justify-between items-start
                     ${isSelected
@@ -111,14 +100,13 @@ export default function ProjectTypeSelector({
                   `}
                 >
                   <div className="flex-1">
-                    <div className="font-medium text-gray-900">
-                      {info?.name || type}
+                    <div className="font-medium text-gray-900 flex items-center gap-2">
+                      <span>{projectType.icon}</span>
+                      <span>{projectType.name}</span>
                     </div>
-                    {info?.description && (
-                      <div className="text-sm text-gray-500 mt-1">
-                        {info.description}
-                      </div>
-                    )}
+                    <div className="text-sm text-gray-500 mt-1">
+                      {projectType.description}
+                    </div>
                     {warning && (
                       <div className={`text-xs mt-2 ${
                         warning.includes('Not permitted') 
@@ -145,28 +133,21 @@ export default function ProjectTypeSelector({
           Popular Projects
         </h3>
         <div className="flex flex-wrap gap-2">
-          {[
-            ProjectType.REAR_EXTENSION,
-            ProjectType.LOFT_CONVERSION,
-            ProjectType.GARDEN_ROOM,
-            ProjectType.SOLAR_PANELS,
-            ProjectType.WINDOWS,
-            ProjectType.DRIVEWAY,
-          ].map((type) => {
-            const info = getProjectTypeInfo(type);
+          {getPopularProjects().slice(0, 6).map((projectType) => {
+            const isSelected = selectedType?.id === projectType.id;
             return (
               <button
-                key={type}
-                onClick={() => onSelect(type)}
+                key={projectType.id}
+                onClick={() => onSelect(projectType)}
                 className={`
                   px-4 py-2 rounded-full text-sm transition-all
-                  ${selectedType === type
+                  ${isSelected
                     ? 'bg-blue-500 text-white'
                     : 'bg-white text-gray-700 hover:bg-gray-100 border border-gray-200'
                   }
                 `}
               >
-                {info?.name || type}
+                {projectType.name}
               </button>
             );
           })}
