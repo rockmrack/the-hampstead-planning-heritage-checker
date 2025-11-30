@@ -235,8 +235,8 @@ export function predictApproval(input: PredictionInput): PredictionResult {
   }
   
   // Apply borough modifier
-  const boroughModifier = BOROUGH_MODIFIERS[input.borough] || BOROUGH_MODIFIERS.default;
-  if (boroughModifier < 0.95) {
+  const boroughModifier = BOROUGH_MODIFIERS[input.borough] || BOROUGH_MODIFIERS['default'];
+  if (boroughModifier && boroughModifier < 0.95) {
     probability *= boroughModifier;
     riskFactors.push({
       factor: 'Strict Local Planning Authority',

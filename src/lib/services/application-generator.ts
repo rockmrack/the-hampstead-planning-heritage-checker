@@ -3,7 +3,14 @@
  * Auto-generate planning application forms and documents
  */
 
-import { ProjectType, getProjectTypeInfo } from '../config/project-types';
+import { ProjectType, getProjectById } from '../config/project-types';
+
+// Helper function to get project type info
+function getProjectTypeInfo(projectTypeId: string): { name: string; description?: string } | null {
+  const project = getProjectById(projectTypeId);
+  if (!project) return null;
+  return { name: project.name, description: project.description };
+}
 
 export interface ApplicationFormData {
   // Applicant
@@ -488,7 +495,7 @@ export function generateCoveringLetter(
 ): GeneratedDocument {
   const applicantName = `${formData.applicant.firstName} ${formData.applicant.lastName}`;
   const siteAddress = `${formData.site.address.line1}, ${formData.site.address.postcode}`;
-  const projectInfo = getProjectTypeInfo(formData.proposal.projectType);
+  const projectInfo = getProjectTypeInfo(formData.proposal.projectType.id);
   
   const content = `
 ${applicantName}

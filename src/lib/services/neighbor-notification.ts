@@ -306,22 +306,22 @@ class NeighborNotificationService {
     
     // Adjust based on project type
     if (projectType === 'basement') {
-      baseNeighbors[0].affectedBy.push('structural-monitoring', 'access-required');
-      baseNeighbors[0].partyWallRequired = true;
-      baseNeighbors[1].affectedBy.push('structural-monitoring', 'access-required');
-      baseNeighbors[1].partyWallRequired = true;
-      baseNeighbors[2].affectedBy.push('access-required');
+      baseNeighbors[0]!.affectedBy.push('structural-monitoring', 'access-required');
+      baseNeighbors[0]!.partyWallRequired = true;
+      baseNeighbors[1]!.affectedBy.push('structural-monitoring', 'access-required');
+      baseNeighbors[1]!.partyWallRequired = true;
+      baseNeighbors[2]!.affectedBy.push('access-required');
     }
     
     if (['rear-extension-single', 'rear-extension-double', 'wrap-around'].includes(projectType)) {
-      baseNeighbors[0].partyWallRequired = true;
-      baseNeighbors[1].partyWallRequired = true;
-      baseNeighbors[2].affectedBy.push('light-impact');
+      baseNeighbors[0]!.partyWallRequired = true;
+      baseNeighbors[1]!.partyWallRequired = true;
+      baseNeighbors[2]!.affectedBy.push('light-impact');
     }
     
     if (projectType === 'loft-conversion') {
-      baseNeighbors[0].partyWallRequired = true;
-      baseNeighbors[1].partyWallRequired = true;
+      baseNeighbors[0]!.partyWallRequired = true;
+      baseNeighbors[1]!.partyWallRequired = true;
       baseNeighbors.push({
         id: 'neighbor-opposite',
         address: 'Property opposite',
@@ -438,20 +438,20 @@ class NeighborNotificationService {
    */
   private getTemplatesForNeighbor(neighbor: Neighbor, partyWall: PartyWallRequirement): NotificationTemplate[] {
     const templates: NotificationTemplate[] = [
-      TEMPLATES['friendly-intro'],
-      TEMPLATES['pre-start-courtesy'],
+      TEMPLATES['friendly-intro']!,
+      TEMPLATES['pre-start-courtesy']!,
     ];
     
     if (neighbor.partyWallRequired && partyWall.required) {
       if (partyWall.type === 'adjacent-excavation') {
-        templates.unshift(TEMPLATES['party-wall-notice-excavation']);
+        templates.unshift(TEMPLATES['party-wall-notice-excavation']!);
       } else {
-        templates.unshift(TEMPLATES['party-wall-notice-structure']);
+        templates.unshift(TEMPLATES['party-wall-notice-structure']!);
       }
     }
     
-    templates.push(TEMPLATES['during-works-update']);
-    templates.push(TEMPLATES['completion-notice']);
+    templates.push(TEMPLATES['during-works-update']!);
+    templates.push(TEMPLATES['completion-notice']!);
     
     return templates;
   }
@@ -470,14 +470,14 @@ class NeighborNotificationService {
       const partyWallNoticeDate = new Date(startDate);
       partyWallNoticeDate.setDate(partyWallNoticeDate.getDate() - 70); // 10 weeks before
       timeline.push({
-        date: partyWallNoticeDate.toISOString().split('T')[0],
+        date: partyWallNoticeDate.toISOString().split('T')[0] ?? '',
         action: 'Serve party wall notice',
       });
       
       const responseDeadline = new Date(partyWallNoticeDate);
       responseDeadline.setDate(responseDeadline.getDate() + 14);
       timeline.push({
-        date: responseDeadline.toISOString().split('T')[0],
+        date: responseDeadline.toISOString().split('T')[0] ?? '',
         action: 'Response deadline (14 days)',
       });
     }
@@ -485,14 +485,14 @@ class NeighborNotificationService {
     const introLetterDate = new Date(startDate);
     introLetterDate.setDate(introLetterDate.getDate() - 42); // 6 weeks before
     timeline.push({
-      date: introLetterDate.toISOString().split('T')[0],
+      date: introLetterDate.toISOString().split('T')[0] ?? '',
       action: 'Send friendly introduction letter',
     });
     
     const preStartDate = new Date(startDate);
     preStartDate.setDate(preStartDate.getDate() - 7); // 1 week before
     timeline.push({
-      date: preStartDate.toISOString().split('T')[0],
+      date: preStartDate.toISOString().split('T')[0] ?? '',
       action: 'Send pre-start notification',
     });
     
@@ -545,7 +545,7 @@ class NeighborNotificationService {
     if (partyWall.required) {
       phases.push({
         phase: 'Party Wall Process',
-        start: idealStart.toISOString().split('T')[0],
+        start: idealStart.toISOString().split('T')[0] ?? '',
         duration: '6-8 weeks',
         actions: [
           'Appoint party wall surveyor',
@@ -561,7 +561,7 @@ class NeighborNotificationService {
     neighborOutreach.setDate(neighborOutreach.getDate() - 42);
     phases.push({
       phase: 'Neighbor Outreach',
-      start: neighborOutreach.toISOString().split('T')[0],
+      start: neighborOutreach.toISOString().split('T')[0] ?? '',
       duration: '2 weeks',
       actions: [
         'Send introduction letters',
@@ -575,7 +575,7 @@ class NeighborNotificationService {
     preStart.setDate(preStart.getDate() - 7);
     phases.push({
       phase: 'Pre-Start Communications',
-      start: preStart.toISOString().split('T')[0],
+      start: preStart.toISOString().split('T')[0] ?? '',
       duration: '1 week',
       actions: [
         'Final notification to all neighbors',
@@ -585,8 +585,8 @@ class NeighborNotificationService {
     });
     
     return {
-      idealStart: idealStart.toISOString().split('T')[0],
-      latestStart: latestStart.toISOString().split('T')[0],
+      idealStart: idealStart.toISOString().split('T')[0] ?? '',
+      latestStart: latestStart.toISOString().split('T')[0] ?? '',
       phases,
     };
   }

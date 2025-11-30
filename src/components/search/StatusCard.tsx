@@ -262,3 +262,6 @@ export default function StatusCard({
     </motion.div>
   );
 }
+
+// Named export for compatibility with tests
+export { StatusCard };

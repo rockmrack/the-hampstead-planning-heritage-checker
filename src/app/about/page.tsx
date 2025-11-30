@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Header } from '@/components/layout/Header';
-import { Footer } from '@/components/layout/Footer';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
 import { COMPANY_INFO, BOROUGHS } from '@/lib/config/constants';
 
 export const metadata: Metadata = {
@@ -219,7 +219,7 @@ export default function AboutPage() {
                 Check Your Property
               </Link>
               <a
-                href={`mailto:${COMPANY_INFO.email}`}
+                href={`mailto:${COMPANY_INFO.contact.email}`}
                 className="inline-flex items-center justify-center gap-2 bg-white/10 text-white px-8 py-4 rounded-lg font-semibold hover:bg-white/20 transition-colors"
               >
                 Contact Us
@@ -245,7 +245,7 @@ export default function AboutPage() {
                     <span className="text-2xl">📍</span>
                     <div>
                       <h3 className="font-semibold text-slate-900">Address</h3>
-                      <p className="text-slate-600">{COMPANY_INFO.address}</p>
+                      <p className="text-slate-600">{COMPANY_INFO.address.full}</p>
                     </div>
                   </div>
                   <div className="flex items-start gap-4">
@@ -253,10 +253,10 @@ export default function AboutPage() {
                     <div>
                       <h3 className="font-semibold text-slate-900">Email</h3>
                       <a 
-                        href={`mailto:${COMPANY_INFO.email}`}
+                        href={`mailto:${COMPANY_INFO.contact.email}`}
                         className="text-primary-600 hover:underline"
                       >
-                        {COMPANY_INFO.email}
+                        {COMPANY_INFO.contact.email}
                       </a>
                     </div>
                   </div>
@@ -265,10 +265,10 @@ export default function AboutPage() {
                     <div>
                       <h3 className="font-semibold text-slate-900">Phone</h3>
                       <a 
-                        href={`tel:${COMPANY_INFO.phone}`}
+                        href={`tel:${COMPANY_INFO.contact.phone}`}
                         className="text-primary-600 hover:underline"
                       >
-                        {COMPANY_INFO.phone}
+                        {COMPANY_INFO.contact.phone}
                       </a>
                     </div>
                   </div>

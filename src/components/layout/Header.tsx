@@ -221,3 +221,6 @@ export default function Header() {
     </header>
   );
 }
+
+// Named export for compatibility with tests
+export { Header };

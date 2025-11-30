@@ -567,11 +567,11 @@ class NaturalLanguageQueryService {
           // Extract entities
           for (const extractor of pattern.entityExtractors) {
             const match = query.match(extractor.pattern);
-            if (match) {
+            if (match && match[1]) {
               if (extractor.name === 'measurement') {
                 entities.measurement = {
                   value: parseFloat(match[1]),
-                  unit: match[2].toLowerCase(),
+                  unit: (match[2] ?? 'meters').toLowerCase(),
                 };
               } else {
                 (entities as Record<string, string>)[extractor.name] = match[1] || match[0];
@@ -586,7 +586,7 @@ class NaturalLanguageQueryService {
     
     // Also check for postcodes anywhere in query
     const postcodeMatch = query.match(/\b([A-Z]{1,2}[0-9][0-9A-Z]?\s*[0-9][A-Z]{2}|NW[0-9]+|N[0-9]+)\b/i);
-    if (postcodeMatch && !entities.postcode) {
+    if (postcodeMatch && postcodeMatch[1] && !entities.postcode) {
       entities.postcode = postcodeMatch[1].toUpperCase();
     }
     

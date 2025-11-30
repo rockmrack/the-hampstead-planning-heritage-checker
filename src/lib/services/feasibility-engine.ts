@@ -3,8 +3,65 @@
  * Determines if a project is allowed and what's required
  */
 
-import { ProjectType, getProjectTypeInfo, canDoProject, PDRuleSet } from '../config/project-types';
+import { ProjectType, getProjectById, getRulesForProject, PDRule } from '../config/project-types';
 import { predictApproval, PredictionInput, PredictionResult } from './approval-prediction';
+
+// Define project type string constants for comparison
+const PROJECT_TYPE_IDS = {
+  SIDE_EXTENSION: 'side-extension',
+  LOFT_CONVERSION: 'loft-conversion',
+  BASEMENT: 'basement',
+  REAR_EXTENSION: 'rear-extension-single',
+  REAR_EXTENSION_DOUBLE: 'rear-extension-double',
+} as const;
+
+// Extended PDRule with additional properties for feasibility checks
+interface PDRuleExtended extends Partial<PDRule> {
+  maxDepth?: number;
+  maxHeight?: number;
+  maxArea?: number;
+  priorApproval?: boolean;
+}
+
+// Helper functions
+function getProjectTypeInfo(projectTypeId: string): { name: string; pdClass?: string; rules?: PDRuleExtended } | null {
+  const project = getProjectById(projectTypeId);
+  if (!project) return null;
+  
+  // Get rules based on standard heritage status
+  const rules = getRulesForProject(projectTypeId, 'GREEN', false);
+  
+  return {
+    name: project.name,
+    pdClass: 'Class A', // Default PD class
+    rules: rules ? {
+      ...rules,
+      maxDepth: rules.maxDimensions?.depth,
+      maxHeight: rules.maxDimensions?.height,
+      maxArea: rules.maxDimensions?.area,
+    } : undefined,
+  };
+}
+
+function canDoProject(
+  projectTypeId: string,
+  heritageStatus: 'RED' | 'AMBER' | 'GREEN',
+  hasArticle4: boolean,
+  _propertyType?: string
+): { allowed: boolean; requiresPermission: boolean; conditions?: string[]; reason?: string } {
+  const rules = getRulesForProject(projectTypeId, heritageStatus, hasArticle4);
+  
+  if (!rules) {
+    return { allowed: false, requiresPermission: true, reason: 'Unknown project type' };
+  }
+  
+  return {
+    allowed: rules.allowed,
+    requiresPermission: rules.requiresPermission || false,
+    conditions: rules.conditions,
+    reason: rules.notes?.join('. '),
+  };
+}
 
 export interface PropertyContext {
   // Location
@@ -181,9 +238,9 @@ export function assessFeasibility(
   project: ProjectSpecification
 ): FeasibilityReport {
   // Get base project rules
-  const projectInfo = getProjectTypeInfo(project.projectType);
+  const projectInfo = getProjectTypeInfo(project.projectType.id);
   const baseCheck = canDoProject(
-    project.projectType,
+    project.projectType.id,
     property.heritageStatus,
     property.hasArticle4,
     property.propertyType
@@ -206,7 +263,7 @@ export function assessFeasibility(
   
   // Check for Article 4 restrictions
   if (property.hasArticle4 && property.article4Restrictions) {
-    const projectTypeName = project.projectType.toLowerCase().replace('_', ' ');
+    const projectTypeName = project.projectType.id.toLowerCase().replace('_', ' ');
     if (property.article4Restrictions.some(r => 
       r.toLowerCase().includes(projectTypeName) ||
       r.toLowerCase().includes('extensions') ||
@@ -269,7 +326,7 @@ export function assessFeasibility(
   };
   
   if (projectInfo?.rules) {
-    const rules = projectInfo.rules as PDRuleSet;
+    const rules = projectInfo.rules as PDRuleExtended;
     
     // Check depth
     if (rules.maxDepth && project.depth && project.depth > rules.maxDepth) {
@@ -303,7 +360,7 @@ export function assessFeasibility(
   }
   
   // Property type specific checks
-  if (property.propertyType === 'terraced' && project.projectType === ProjectType.SIDE_EXTENSION) {
+  if (property.propertyType === 'terraced' && project.projectType.id === PROJECT_TYPE_IDS.SIDE_EXTENSION) {
     dimensionCheck.passed = false;
     dimensionCheck.exceedances.push('Side extensions not possible on terraced properties');
   }
@@ -446,7 +503,8 @@ export function assessFeasibility(
   }
   
   // Structural engineer for certain projects
-  if ([ProjectType.LOFT_CONVERSION, ProjectType.BASEMENT, ProjectType.REAR_EXTENSION].includes(project.projectType)) {
+  const projectTypeIdsArray: string[] = [PROJECT_TYPE_IDS.LOFT_CONVERSION, PROJECT_TYPE_IDS.BASEMENT, PROJECT_TYPE_IDS.REAR_EXTENSION];
+  if (projectTypeIdsArray.includes(project.projectType.id)) {
     professionalFees.structuralEngineer = 800;
   }
   
@@ -489,7 +547,7 @@ export function assessFeasibility(
       listedGrade: property.listedGrade,
       conservationAreaName: property.conservationAreaName,
       borough: property.borough,
-      projectType: project.projectType.toLowerCase().replace('_', '-'),
+      projectType: project.projectType.id.toLowerCase().replace('_', '-'),
       isVisibleFromHighway: project.isVisibleFromHighway,
       affectsNeighbors: project.affectsNeighbors,
       hasArchitect: true, // Assume they'll use one
@@ -624,11 +682,12 @@ export function assessFeasibility(
 // ===========================================
 
 export function quickFeasibilityCheck(
-  projectType: ProjectType,
+  projectType: ProjectType | string,
   heritageStatus: 'RED' | 'AMBER' | 'GREEN',
   hasArticle4: boolean
 ): { allowed: boolean; requiresPermission: boolean; summary: string } {
-  const result = canDoProject(projectType, heritageStatus, hasArticle4);
+  const projectTypeId = typeof projectType === 'string' ? projectType : projectType.id;
+  const result = canDoProject(projectTypeId, heritageStatus, hasArticle4);
   
   let summary: string;
   

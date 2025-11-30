@@ -395,10 +395,10 @@ class BuilderCostComparisonService {
     estimatedBudget?: number,
     requireHeritage?: boolean
   ): Builder[] {
-    const district = postcode.toUpperCase().split(' ')[0];
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
     
     let builders = BUILDERS.filter(builder => 
-      builder.areas.includes(district) &&
+      district && builder.areas.includes(district) &&
       this.builderMatchesProjectType(builder, projectType)
     );
     
@@ -469,12 +469,14 @@ class BuilderCostComparisonService {
         'NW1': ['NW3', 'NW5', 'NW6'],
       };
       
-      const alternatives = similarAreas[district] || [];
-      for (const alt of alternatives) {
-        benchmark = COST_BENCHMARKS.find(b =>
-          b.projectType === projectType && b.area === alt
-        );
-        if (benchmark) break;
+      const alternatives = district ? similarAreas[district] : undefined;
+      if (alternatives) {
+        for (const alt of alternatives) {
+          benchmark = COST_BENCHMARKS.find(b =>
+            b.projectType === projectType && b.area === alt
+          );
+          if (benchmark) break;
+        }
       }
     }
     
@@ -535,9 +537,9 @@ class BuilderCostComparisonService {
       benchmarks: benchmark ? [benchmark] : [],
       recommendations: {
         bestValue: this.findBestValue(builders, quotes),
-        bestRated: builders.length > 0 ? [...builders].sort((a, b) => b.rating - a.rating)[0] : null,
-        mostExperienced: builders.length > 0 ? [...builders].sort((a, b) => b.yearsInBusiness - a.yearsInBusiness)[0] : null,
-        fastestStart: builders.length > 0 ? builders.find(b => b.leadTime.includes('2-3') || b.leadTime.includes('3-4')) || builders[0] : null,
+        bestRated: builders.length > 0 ? [...builders].sort((a, b) => b.rating - a.rating)[0] ?? null : null,
+        mostExperienced: builders.length > 0 ? [...builders].sort((a, b) => b.yearsInBusiness - a.yearsInBusiness)[0] ?? null : null,
+        fastestStart: builders.length > 0 ? builders.find(b => b.leadTime.includes('2-3') || b.leadTime.includes('3-4')) ?? builders[0] ?? null : null,
       },
       averageQuote: avgQuote,
       savingsPotential: {
@@ -660,11 +662,11 @@ class BuilderCostComparisonService {
         'Decorating',
       ],
       paymentTerms: '10% deposit, staged payments monthly, 5% retention',
-      startDate: startDate.toISOString().split('T')[0],
+      startDate: startDate.toISOString().split('T')[0] ?? '',
       duration: projectType === 'basement' ? '24-36 weeks' : 
                 projectType === 'loft-conversion' ? '10-14 weeks' : '12-16 weeks',
       warranty: '10-year structural warranty, 2-year snag warranty',
-      validUntil: validUntil.toISOString().split('T')[0],
+      validUntil: validUntil.toISOString().split('T')[0] ?? '',
     };
   }
 
@@ -679,8 +681,8 @@ class BuilderCostComparisonService {
    * Get all builders in an area
    */
   getBuildersByArea(postcode: string): Builder[] {
-    const district = postcode.toUpperCase().split(' ')[0];
-    return BUILDERS.filter(b => b.areas.includes(district));
+    const district = postcode.toUpperCase().split(' ')[0] ?? '';
+    return BUILDERS.filter(b => district && b.areas.includes(district));
   }
 }
 

@@ -179,6 +179,11 @@ class AIPhotoAnalysisService {
     
     const pattern = isVictorian ? PROPERTY_PATTERNS[0] : PROPERTY_PATTERNS[2];
     
+    // Ensure pattern is not undefined
+    if (!pattern) {
+      throw new Error('Property pattern not found');
+    }
+    
     const propertyType = isVictorian ? 'terraced' : 'semi-detached';
     
     return {
@@ -324,8 +329,8 @@ class AIPhotoAnalysisService {
   private generateConstraints(
     isVictorian: boolean,
     isHighValue: boolean
-  ): PhotoAnalysisResult['constraints'][] {
-    const constraints: PhotoAnalysisResult['constraints'][] = [];
+  ): PhotoAnalysisResult['constraints'] {
+    const constraints: PhotoAnalysisResult['constraints'] = [];
     
     if (isVictorian) {
       constraints.push({
@@ -374,6 +379,10 @@ class AIPhotoAnalysisService {
     
     // Merge analyses - in production, AI would synthesize these
     const primary = analyses[0];
+    
+    if (!primary) {
+      throw new Error('No photos to analyze');
+    }
     
     // Increase confidence if multiple photos
     primary.confidence.overall = Math.min(95, primary.confidence.overall + (photos.length - 1) * 5);

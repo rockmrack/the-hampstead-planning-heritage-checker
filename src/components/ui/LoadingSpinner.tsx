@@ -30,3 +30,6 @@ export default function LoadingSpinner({ size = 'md', className }: LoadingSpinne
     </div>
   );
 }
+
+// Named export for compatibility with tests
+export { LoadingSpinner };

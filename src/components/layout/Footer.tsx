@@ -189,3 +189,6 @@ export default function Footer() {
     </footer>
   );
 }
+
+// Named export for compatibility with tests
+export { Footer };
