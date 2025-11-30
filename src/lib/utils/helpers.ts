@@ -301,3 +301,61 @@ export function sanitizeHtml(str: string): string {
   };
   return str.replace(/[&<>"']/g, (char) => map[char] ?? char);
 }
+
+/**
+ * Extract postcode from an address string
+ */
+export function extractPostcode(address: string): string | null {
+  const regex = /([A-Z]{1,2}[0-9][A-Z0-9]? ?[0-9][A-Z]{2})/i;
+  const match = regex.exec(address);
+  return match ? formatPostcode(match[1] ?? '') : null;
+}
+
+/**
+ * Check if coordinates are within Greater London bounds
+ */
+export function isWithinLondonBounds(lng: number, lat: number): boolean {
+  // Approximate Greater London bounding box
+  const bounds = {
+    north: 51.7,
+    south: 51.3,
+    east: 0.3,
+    west: -0.5,
+  };
+  return lat >= bounds.south && lat <= bounds.north && lng >= bounds.west && lng <= bounds.east;
+}
+
+/**
+ * Convert string to URL-friendly slug
+ */
+export function slugify(str: string): string {
+  return str
+    .toLowerCase()
+    .trim()
+    .replace(/[^\w\s-]/g, '')
+    .replace(/[\s_-]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+}
+
+/**
+ * Sanitize user input to prevent XSS
+ */
+export function sanitizeInput(input: string): string {
+  return input
+    .trim()
+    .replace(/[<>]/g, '')
+    .slice(0, 1000);
+}
+
+/**
+ * Generate a simple hash from a string
+ */
+export function hashString(str: string): string {
+  let hash = 0;
+  for (let i = 0; i < str.length; i++) {
+    const char = str.charCodeAt(i);
+    hash = ((hash << 5) - hash) + char;
+    hash = hash & hash; // Convert to 32bit integer
+  }
+  return Math.abs(hash).toString(16);
+}
