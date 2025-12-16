@@ -85,3 +85,6 @@ __tests__/__snapshots__/
 
 # Husky
 .husky/_
+
+# Snyk Security Extension - AI Rules (auto-generated)
+.github/instructions/snyk_rules.instructions.md

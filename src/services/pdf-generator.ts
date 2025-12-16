@@ -1,10 +1,17 @@
 /**
  * PDF Report Generator Service
  * Generates branded PDF reports for property checks
+ * 
+ * Performance: jsPDF is dynamically imported to prevent loading on initial page render
  */
 
-import jsPDF from 'jspdf';
 import { format } from 'date-fns';
+import type { jsPDF as JsPDFType } from 'jspdf';
+
+// Dynamic import for jsPDF - only loaded when generating PDFs
+const loadJsPDF = async (): Promise<typeof import('jspdf')> => {
+  return import('jspdf');
+};
 
 import { COMPANY_INFO, PDF_CONFIG, STATUS_CONFIG, LISTED_GRADES } from '@/lib/config';
 import { getExpertOpinion } from '@/services/property-check';
@@ -17,6 +24,9 @@ export async function generatePropertyReport(
   data: PDFReportData,
   options: PDFGenerationOptions = { includeMap: true, includeExpertOpinion: true }
 ): Promise<Blob> {
+  // Dynamic import - jsPDF is only loaded when this function is called
+  const { default: jsPDF } = await loadJsPDF();
+  
   const { propertyResult, userEmail, generatedAt, mapSnapshot } = data;
   const doc = new jsPDF('p', 'mm', 'a4');
 
@@ -62,7 +72,7 @@ export async function generatePropertyReport(
  * Add header with company branding
  */
 function addHeader(
-  doc: jsPDF,
+  doc: JsPDFType,
   y: number,
   contentWidth: number,
   margins: typeof PDF_CONFIG.margins
@@ -106,7 +116,7 @@ function addHeader(
  * Add status badge
  */
 function addStatusBadge(
-  doc: jsPDF,
+  doc: JsPDFType,
   result: PropertyCheckResult,
   y: number,
   margins: typeof PDF_CONFIG.margins
@@ -148,7 +158,7 @@ function addStatusBadge(
  * Add property details section
  */
 function addPropertyDetails(
-  doc: jsPDF,
+  doc: JsPDFType,
   result: PropertyCheckResult,
   y: number,
   margins: typeof PDF_CONFIG.margins,
@@ -188,7 +198,7 @@ function addPropertyDetails(
  * Add map snapshot
  */
 function addMapSnapshot(
-  doc: jsPDF,
+  doc: JsPDFType,
   mapSnapshot: string,
   y: number,
   margins: typeof PDF_CONFIG.margins,
@@ -220,7 +230,7 @@ function addMapSnapshot(
  * Add detailed findings section
  */
 function addDetailedFindings(
-  doc: jsPDF,
+  doc: JsPDFType,
   result: PropertyCheckResult,
   y: number,
   margins: typeof PDF_CONFIG.margins,
@@ -312,7 +322,7 @@ function addDetailedFindings(
  * Add expert opinion section
  */
 function addExpertOpinion(
-  doc: jsPDF,
+  doc: JsPDFType,
   result: PropertyCheckResult,
   y: number,
   margins: typeof PDF_CONFIG.margins,
@@ -348,7 +358,7 @@ function addExpertOpinion(
  * Add call to action section
  */
 function addCallToAction(
-  doc: jsPDF,
+  doc: JsPDFType,
   result: PropertyCheckResult,
   y: number,
   margins: typeof PDF_CONFIG.margins,
@@ -390,7 +400,7 @@ function addCallToAction(
  * Add footer
  */
 function addFooter(
-  doc: jsPDF,
+  doc: JsPDFType,
   userEmail: string,
   generatedAt: string
 ): void {

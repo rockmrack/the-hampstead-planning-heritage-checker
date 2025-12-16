@@ -142,14 +142,34 @@ const nextConfig = {
           chunks: 'all',
           cacheGroups: {
             mapbox: {
-              test: /[\\/]node_modules[\\/](mapbox-gl)[\\/]/,
+              test: /[\\/]node_modules[\\/](mapbox-gl|react-map-gl)[\\/]/,
               name: 'mapbox',
+              priority: 20,
+              reuseExistingChunk: true,
+            },
+            pdf: {
+              test: /[\\/]node_modules[\\/](jspdf|html2canvas)[\\/]/,
+              name: 'pdf-libs',
+              priority: 15,
+              reuseExistingChunk: true,
+            },
+            animations: {
+              test: /[\\/]node_modules[\\/](framer-motion)[\\/]/,
+              name: 'animations',
+              priority: 15,
+              reuseExistingChunk: true,
+            },
+            utils: {
+              test: /[\\/]node_modules[\\/](date-fns|lodash|uuid)[\\/]/,
+              name: 'utils',
               priority: 10,
+              reuseExistingChunk: true,
             },
             vendor: {
               test: /[\\/]node_modules[\\/]/,
               name: 'vendors',
               priority: -10,
+              reuseExistingChunk: true,
             },
           },
         },
