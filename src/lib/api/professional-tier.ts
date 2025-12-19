@@ -158,6 +158,12 @@ export class RateLimiter {
     const now = Date.now();
     const windowStart = Math.floor(now / this.windowMs) * this.windowMs;
 
+    // If an unknown tier is provided, fail closed and report zero remaining
+    if (!tier) {
+      const resetAt = new Date(windowStart + this.windowMs);
+      return { allowed: false, remaining: 0, resetAt };
+    }
+
     const key = apiKey.id;
     let record = this.requests.get(key);
 
@@ -180,11 +186,13 @@ export class RateLimiter {
 
   checkDaily(apiKey: APIKey): boolean {
     const tier = API_TIERS[apiKey.tier];
+    if (!tier) return false;
     return apiKey.usage.today < tier.limits.requestsPerDay;
   }
 
   checkMonthly(apiKey: APIKey): boolean {
     const tier = API_TIERS[apiKey.tier];
+    if (!tier) return false;
     return apiKey.usage.thisMonth < tier.limits.requestsPerMonth;
   }
 }
