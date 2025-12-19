@@ -596,7 +596,7 @@ export function getLPAFromPostcode(postcode: string): LocalPlanningAuthority | u
   const [rawDistrict] = normalized.split(' ');
   if (!rawDistrict) return undefined;
 
-  const district = rawDistrict.replace(/[0-9]+$/, (match) => {
+  const district = rawDistrict.replace(/[0-9]+$/, (match): string => {
     // Keep first digit for most postcodes, all digits for short ones like M1
     return normalized.length <= 5 ? match : match[0];
   });
