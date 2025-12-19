@@ -53,11 +53,12 @@ export async function GET(request: NextRequest) {
     if (deep && !error) {
       try {
         const adminClient = getSupabaseAdmin();
+        // Cast the RPC payload to never to satisfy generated Supabase types
         const { error: postgisError } = await adminClient.rpc('find_nearby_listed_buildings', {
           search_lat: 51.5074,
           search_lng: -0.1278,
           radius_meters: 1,
-        });
+        } as never);
 
         checks['database'].details = {
           postgis: postgisError ? 'error' : 'ok',
