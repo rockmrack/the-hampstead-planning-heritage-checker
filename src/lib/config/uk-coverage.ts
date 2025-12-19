@@ -590,13 +590,19 @@ const POSTCODE_TO_LPA: Record<string, string> = {
 
 export function getLPAFromPostcode(postcode: string): LocalPlanningAuthority | undefined {
   // Extract district from postcode (e.g., "NW3 2PL" -> "NW3")
-  const district = postcode.toUpperCase().split(' ')[0].replace(/[0-9]+$/, (match) => {
+  const normalized = postcode.trim().toUpperCase();
+  if (!normalized) return undefined;
+
+  const [rawDistrict] = normalized.split(' ');
+  if (!rawDistrict) return undefined;
+
+  const district = rawDistrict.replace(/[0-9]+$/, (match) => {
     // Keep first digit for most postcodes, all digits for short ones like M1
-    return postcode.length <= 5 ? match : match[0];
+    return normalized.length <= 5 ? match : match[0];
   });
   
   // Try full district first
-  const lpaName = POSTCODE_TO_LPA[district] || POSTCODE_TO_LPA[postcode.split(' ')[0]];
+  const lpaName = POSTCODE_TO_LPA[district] || POSTCODE_TO_LPA[rawDistrict];
   
   if (lpaName) {
     return getLPAByName(lpaName);
