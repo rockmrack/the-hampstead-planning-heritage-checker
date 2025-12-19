@@ -65,23 +65,27 @@ export function Building3DViewer({
   // Touch handlers
   const handleTouchStart = (e: React.TouchEvent) => {
     if (e.touches.length === 1) {
+      const touch = e.touches[0];
+      if (!touch) return;
       setIsDragging(true);
-      setLastPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+      setLastPos({ x: touch.clientX, y: touch.clientY });
     }
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging || e.touches.length !== 1) return;
-    
-    const deltaX = e.touches[0].clientX - lastPos.x;
-    const deltaY = e.touches[0].clientY - lastPos.y;
+
+    const touch = e.touches[0];
+    if (!touch) return;
+    const deltaX = touch.clientX - lastPos.x;
+    const deltaY = touch.clientY - lastPos.y;
     
     setRotation(prev => ({
       x: Math.max(-60, Math.min(60, prev.x - deltaY * 0.5)),
       y: prev.y + deltaX * 0.5,
     }));
     
-    setLastPos({ x: e.touches[0].clientX, y: e.touches[0].clientY });
+    setLastPos({ x: touch.clientX, y: touch.clientY });
   };
 
   // Calculate extension position based on type
