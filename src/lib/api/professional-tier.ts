@@ -468,16 +468,16 @@ export function addRateLimitHeaders(
 ): void {
   const tier = API_TIERS[apiKey.tier];
   const stats = apiKeyManager.getUsageStats(apiKey.key);
-  
-  if (stats) {
-    headers.set('X-RateLimit-Limit', tier.limits.requestsPerMinute.toString());
-    headers.set('X-RateLimit-Remaining', (tier.limits.requestsPerMinute - apiKey.requestsInCurrentMinute).toString());
-    headers.set('X-RateLimit-Reset', new Date(Date.now() + 60000).toISOString());
-    headers.set('X-Quota-Limit-Day', tier.limits.requestsPerDay.toString());
-    headers.set('X-Quota-Remaining-Day', (tier.limits.requestsPerDay - stats.usage.today).toString());
-    headers.set('X-Quota-Limit-Month', tier.limits.requestsPerMonth.toString());
-    headers.set('X-Quota-Remaining-Month', (tier.limits.requestsPerMonth - stats.usage.thisMonth).toString());
-  }
+
+  if (!tier || !stats) return;
+
+  headers.set('X-RateLimit-Limit', tier.limits.requestsPerMinute.toString());
+  headers.set('X-RateLimit-Remaining', (tier.limits.requestsPerMinute - apiKey.requestsInCurrentMinute).toString());
+  headers.set('X-RateLimit-Reset', new Date(Date.now() + 60000).toISOString());
+  headers.set('X-Quota-Limit-Day', tier.limits.requestsPerDay.toString());
+  headers.set('X-Quota-Remaining-Day', (tier.limits.requestsPerDay - stats.usage.today).toString());
+  headers.set('X-Quota-Limit-Month', tier.limits.requestsPerMonth.toString());
+  headers.set('X-Quota-Remaining-Month', (tier.limits.requestsPerMonth - stats.usage.thisMonth).toString());
 }
 
 export function createErrorResponse(
