@@ -8,7 +8,6 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, MapPin, Loader2, X } from 'lucide-react';
 
-import { geocodeAddress } from '@/services/geocoding';
 import { cn, debounce } from '@/lib/utils/helpers';
 import { SEARCH_CONFIG } from '@/lib/config';
 import type { GeocodingResult, Coordinates } from '@/types';
@@ -53,7 +52,11 @@ export default function AddressSearch({
       setError(null);
 
       try {
-        const searchResults = await geocodeAddress(searchQuery);
+        const response = await fetch(`/api/geocode?q=${encodeURIComponent(searchQuery)}`);
+        if (!response.ok) throw new Error('Search failed');
+        const data = await response.json();
+        const searchResults = data.data || [];
+        
         setResults(searchResults);
         setIsOpen(searchResults.length > 0);
         setHighlightedIndex(-1);
