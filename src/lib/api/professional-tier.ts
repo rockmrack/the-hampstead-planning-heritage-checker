@@ -331,6 +331,7 @@ export class APIKeyManager {
     if (!apiKey) return null;
 
     const tier = API_TIERS[apiKey.tier];
+    if (!tier) return null;
     return {
       usage: apiKey.usage,
       limits: tier.limits,
