@@ -946,6 +946,7 @@ export function getConservationAreaByName(name: string): ConservationAreaProfile
 
 export function getConservationAreaByPostcode(postcode: string): ConservationAreaProfile | undefined {
   const district = postcode.toUpperCase().split(' ')[0];
+  if (!district) return undefined;
   return CONSERVATION_AREA_PROFILES.find(ca => 
     ca.boundaries.postcodes.some(p => district.startsWith(p.replace(' ', '')))
   );
