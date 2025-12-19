@@ -781,6 +781,7 @@ export function getAreaIntelligence(id: string): AreaIntelligence | undefined {
 
 export function getAreaByPostcode(postcode: string): AreaIntelligence | undefined {
   const district = postcode.toUpperCase().split(' ')[0];
+  if (!district) return undefined;
   return AREA_INTELLIGENCE.find(area => 
     area.postcodes.some(p => district.startsWith(p))
   );
