@@ -44,6 +44,7 @@
     "react-hook-form": "^7.49.2",
     "react-hot-toast": "^2.4.1",
     "react-map-gl": "^7.1.7",
+    "redis": "^4.6.13",
     "tailwind-merge": "^2.2.0",
     "uuid": "^9.0.1",
     "winston": "^3.11.0",
