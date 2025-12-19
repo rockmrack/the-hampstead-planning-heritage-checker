@@ -18,7 +18,7 @@ import {
 } from 'lucide-react';
 
 import { STATUS_CONFIG, LISTED_GRADES, COMPANY_INFO } from '@/lib/config';
-import { getExpertOpinion } from '@/services/property-check';
+import { getExpertOpinion } from '@/services/property-check-utils';
 import { cn } from '@/lib/utils/helpers';
 import type { PropertyCheckResult, PropertyStatus } from '@/types';
 

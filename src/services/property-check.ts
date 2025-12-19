@@ -299,41 +299,9 @@ async function checkConservationAreaFallback(
   return null;
 }
 
-/**
- * Get expert opinion text based on property status.
- * Returns tailored guidance based on the heritage classification.
- * 
- * @param result - The property check result containing status and building details
- * @returns Expert opinion string with planning guidance
- * 
- * @example
- * ```typescript
- * const opinion = getExpertOpinion(result);
- * // "This Grade II listed building requires Listed Building Consent..."
- * ```
- */
-export function getExpertOpinion(result: PropertyCheckResult): string {
-  if (result.status === 'RED' && result.listedBuilding) {
-    const grade = result.listedBuilding.grade;
-    return EXPERT_OPINIONS.listed[grade] ?? EXPERT_OPINIONS.listed['II'];
-  }
+import { getExpertOpinion, getStatusConfig } from './property-check-utils';
 
-  if (result.status === 'AMBER') {
-    if (result.hasArticle4) {
-      return EXPERT_OPINIONS.conservation.article4;
-    }
-    return EXPERT_OPINIONS.conservation.default;
-  }
-
-  return EXPERT_OPINIONS.standard;
-}
-
-/**
- * Get status configuration for display
- */
-export function getStatusConfig(status: PropertyStatus) {
-  return STATUS_CONFIG[status];
-}
+export { getExpertOpinion, getStatusConfig };
 
 /**
  * Log search to database for analytics and lead generation

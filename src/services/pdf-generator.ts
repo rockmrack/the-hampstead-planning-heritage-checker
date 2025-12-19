@@ -14,7 +14,7 @@ const loadJsPDF = async (): Promise<typeof import('jspdf')> => {
 };
 
 import { COMPANY_INFO, PDF_CONFIG, STATUS_CONFIG, LISTED_GRADES } from '@/lib/config';
-import { getExpertOpinion } from '@/services/property-check';
+import { getExpertOpinion } from '@/services/property-check-utils';
 import type { PropertyCheckResult, PDFReportData, PDFGenerationOptions } from '@/types';
 
 /**
