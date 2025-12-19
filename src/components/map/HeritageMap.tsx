@@ -10,7 +10,7 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 
 import { MAP_CONFIG } from '@/lib/config';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/helpers';
 import type { Coordinates, ConservationArea, ListedBuilding, PropertyCheckResult } from '@/types';
 
 // Set Mapbox access token

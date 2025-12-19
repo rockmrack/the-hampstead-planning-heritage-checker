@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 
-import { cn, isValidEmail } from '@/lib/utils';
+import { cn, isValidEmail } from '@/lib/utils/helpers';
 import { COMPANY_INFO } from '@/lib/config';
 import type { PropertyCheckResult } from '@/types';
 

@@ -10,7 +10,7 @@ import Link from 'next/link';
 import { Menu, X, Phone, MapPin, ChevronDown } from 'lucide-react';
 
 import { COMPANY_INFO } from '@/lib/config';
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/helpers';
 
 interface NavLink {
   href: string;

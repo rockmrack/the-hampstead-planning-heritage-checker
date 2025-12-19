@@ -9,7 +9,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import { Search, MapPin, Loader2, X } from 'lucide-react';
 
 import { geocodeAddress } from '@/services/geocoding';
-import { cn, debounce } from '@/lib/utils';
+import { cn, debounce } from '@/lib/utils/helpers';
 import { SEARCH_CONFIG } from '@/lib/config';
 import type { GeocodingResult, Coordinates } from '@/types';
 

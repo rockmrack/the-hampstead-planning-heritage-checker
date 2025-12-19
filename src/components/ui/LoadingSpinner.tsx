@@ -2,7 +2,7 @@
  * Loading Spinner Component
  */
 
-import { cn } from '@/lib/utils';
+import { cn } from '@/lib/utils/helpers';
 
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
