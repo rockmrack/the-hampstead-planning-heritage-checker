@@ -87,7 +87,7 @@ export async function POST(request: NextRequest) {
         .from('search_logs')
         .select('*')
         .eq('id', searchId)
-        .single();
+        .single() as { data: any | null; error: any };
 
       if (error || !data) {
         return NextResponse.json(
@@ -208,9 +208,9 @@ function generateHTMLReport(result: PropertyCheckResult, userEmail: string): str
         'Party wall agreements may be needed',
       ];
 
-  const warningText = result.status === 'GREEN' 
-    ? (statusConfig as typeof STATUS_CONFIG.GREEN).opportunity 
-    : statusConfig.warning;
+  const warningText = result.status === 'GREEN'
+    ? (statusConfig as typeof STATUS_CONFIG.GREEN).opportunity
+    : (statusConfig as typeof STATUS_CONFIG.RED | typeof STATUS_CONFIG.AMBER).warning;
 
   return `<!DOCTYPE html>
 <html lang="en">

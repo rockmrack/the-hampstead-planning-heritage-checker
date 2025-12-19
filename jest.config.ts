@@ -50,7 +50,7 @@ const config: Config = {
   
   // Transform configuration
   transform: {
-    '^.+\\.(t|j)sx?$': ['@swc/jest'],
+    '^.+\\.(t|j)sx?$': '@swc/jest',
   },
   
   // Module file extensions

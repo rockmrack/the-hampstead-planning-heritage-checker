@@ -47,7 +47,7 @@ export type Env = z.infer<typeof envSchema>;
 
 function getEnvVars(): Env {
   // In development, we provide defaults for non-critical vars
-  const env = {
+  const rawEnv = {
     NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
     NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] ?? '',
     SUPABASE_SERVICE_ROLE_KEY: process.env['SUPABASE_SERVICE_ROLE_KEY'],
@@ -70,7 +70,8 @@ function getEnvVars(): Env {
     LOG_LEVEL: process.env['LOG_LEVEL'] ?? 'info',
   };
 
-  return env as Env;
+  // Parse with schema to transform values
+  return envSchema.parse(rawEnv);
 }
 
 export const env = getEnvVars();

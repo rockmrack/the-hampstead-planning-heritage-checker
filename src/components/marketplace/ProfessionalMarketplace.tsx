@@ -1,11 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { 
-  Professional, 
+import {
+  Professional,
   ProfessionalCategory,
-  PROFESSIONAL_DIRECTORY,
-  findProfessionals 
+  SAMPLE_PROFESSIONALS,
+  getProfessionalsForProject
 } from '@/lib/config/professionals';
 
 interface ProfessionalMarketplaceProps {
@@ -27,15 +27,15 @@ export default function ProfessionalMarketplace({
   const categories: { value: ProfessionalCategory | 'all'; label: string; icon: string }[] = [
     { value: 'all', label: 'All Professionals', icon: '👥' },
     { value: 'architect', label: 'Architects', icon: '📐' },
-    { value: 'planning_consultant', label: 'Planning Consultants', icon: '📋' },
-    { value: 'heritage_consultant', label: 'Heritage Specialists', icon: '🏛️' },
+    { value: 'planning-consultant', label: 'Planning Consultants', icon: '📋' },
+    { value: 'heritage-consultant', label: 'Heritage Specialists', icon: '🏛️' },
     { value: 'builder', label: 'Builders', icon: '🔨' },
     { value: 'surveyor', label: 'Surveyors', icon: '📏' },
-    { value: 'structural_engineer', label: 'Structural Engineers', icon: '🏗️' },
+    { value: 'structural-engineer', label: 'Structural Engineers', icon: '🏗️' },
   ];
 
   const filteredProfessionals = useMemo(() => {
-    let professionals = Object.values(PROFESSIONAL_DIRECTORY).flat();
+    let professionals = [...SAMPLE_PROFESSIONALS];
 
     // Filter by category
     if (selectedCategory !== 'all') {
@@ -45,30 +45,26 @@ export default function ProfessionalMarketplace({
     // Filter by heritage specialization if needed
     if (heritageStatus === 'RED') {
       professionals = professionals.filter(
-        p => p.specializations.includes('listed_buildings') || p.category === 'heritage_consultant'
+        p => p.listedBuildingExpert || p.category === 'heritage-consultant'
       );
     } else if (heritageStatus === 'AMBER') {
       professionals = professionals.filter(
-        p => p.specializations.includes('conservation_areas') || 
-             p.specializations.includes('listed_buildings') ||
-             p.category === 'heritage_consultant'
+        p => p.conservationAreaExpert ||
+             p.listedBuildingExpert ||
+             p.category === 'heritage-consultant'
       );
     }
 
     // Filter by borough if specified
     if (borough) {
       professionals = professionals.filter(
-        p => p.coverage.includes(borough) || p.coverage.includes('London-wide')
+        p => p.coverageAreas.includes(borough) || p.coverageAreas.includes('London-wide')
       );
     }
 
     // Sort
     professionals.sort((a, b) => {
       if (sortBy === 'rating') return b.rating - a.rating;
-      if (sortBy === 'price') {
-        const priceOrder = { 'budget': 0, 'mid-range': 1, 'premium': 2 };
-        return priceOrder[a.priceRange] - priceOrder[b.priceRange];
-      }
       if (sortBy === 'experience') return b.yearsExperience - a.yearsExperience;
       return 0;
     });
@@ -79,23 +75,14 @@ export default function ProfessionalMarketplace({
   const getCategoryColor = (category: ProfessionalCategory): string => {
     const colors: Record<ProfessionalCategory, string> = {
       architect: 'bg-blue-100 text-blue-700',
-      planning_consultant: 'bg-purple-100 text-purple-700',
-      heritage_consultant: 'bg-amber-100 text-amber-700',
+      'planning-consultant': 'bg-purple-100 text-purple-700',
+      'heritage-consultant': 'bg-amber-100 text-amber-700',
       builder: 'bg-green-100 text-green-700',
       surveyor: 'bg-cyan-100 text-cyan-700',
-      structural_engineer: 'bg-red-100 text-red-700',
-      interior_designer: 'bg-pink-100 text-pink-700',
-      landscape_architect: 'bg-emerald-100 text-emerald-700',
+      'structural-engineer': 'bg-red-100 text-red-700',
+      'interior-designer': 'bg-pink-100 text-pink-700',
     };
     return colors[category] || 'bg-gray-100 text-gray-700';
-  };
-
-  const getPriceIndicator = (priceRange: Professional['priceRange']): string => {
-    switch (priceRange) {
-      case 'budget': return '£';
-      case 'mid-range': return '££';
-      case 'premium': return '£££';
-    }
   };
 
   const renderStars = (rating: number): JSX.Element => {
@@ -207,14 +194,16 @@ export default function ProfessionalMarketplace({
                   </div>
                 </div>
 
-                {/* Category & Price */}
+                {/* Category & Badges */}
                 <div className="flex items-center gap-3 mt-3">
                   <span className={`px-3 py-1 rounded-full text-xs font-medium ${getCategoryColor(professional.category)}`}>
-                    {professional.category.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    {professional.category.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                   </span>
-                  <span className="text-sm text-gray-600">
-                    {getPriceIndicator(professional.priceRange)}
-                  </span>
+                  {professional.heritageExpert && (
+                    <span className="px-2 py-1 bg-amber-50 text-amber-700 rounded text-xs">
+                      Heritage Expert
+                    </span>
+                  )}
                   <span className="text-sm text-gray-500">
                     {professional.yearsExperience} years experience
                   </span>
@@ -227,7 +216,7 @@ export default function ProfessionalMarketplace({
                       key={spec}
                       className="px-2 py-1 bg-gray-100 text-gray-600 rounded text-xs"
                     >
-                      {spec.replace('_', ' ')}
+                      {spec}
                     </span>
                   ))}
                   {professional.specializations.length > 4 && (
@@ -237,11 +226,11 @@ export default function ProfessionalMarketplace({
                   )}
                 </div>
 
-                {/* Certifications */}
-                {professional.certifications.length > 0 && (
+                {/* Accreditations */}
+                {professional.accreditations.length > 0 && (
                   <div className="flex items-center gap-2 mt-3">
-                    <span className="text-xs text-gray-500">Certified:</span>
-                    {professional.certifications.slice(0, 3).map((cert) => (
+                    <span className="text-xs text-gray-500">Accredited:</span>
+                    {professional.accreditations.slice(0, 3).map((cert) => (
                       <span
                         key={cert}
                         className="px-2 py-1 bg-green-50 text-green-700 rounded text-xs font-medium"
@@ -254,8 +243,8 @@ export default function ProfessionalMarketplace({
 
                 {/* Coverage */}
                 <p className="text-sm text-gray-500 mt-3">
-                  📍 Covers: {professional.coverage.slice(0, 3).join(', ')}
-                  {professional.coverage.length > 3 && ` +${professional.coverage.length - 3} more`}
+                  📍 Covers: {professional.coverageAreas.slice(0, 3).join(', ')}
+                  {professional.coverageAreas.length > 3 && ` +${professional.coverageAreas.length - 3} more`}
                 </p>
 
                 {/* CTA */}

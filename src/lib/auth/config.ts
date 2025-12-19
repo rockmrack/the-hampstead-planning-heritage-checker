@@ -83,7 +83,7 @@ export const authOptions: NextAuthOptions = {
             .from('user_profiles')
             .select('role')
             .eq('id', data.user.id)
-            .single();
+            .single() as { data: { role: string } | null; error: any };
 
           const user: AuthUser = {
             id: data.user.id,
@@ -158,7 +158,7 @@ export const authOptions: NextAuthOptions = {
           .from('user_profiles')
           .select('id, role')
           .eq('email', user.email)
-          .single();
+          .single() as { data: { id: string; role: string } | null; error: any };
 
         if (existingUser) {
           token.id = existingUser.id;
@@ -172,9 +172,9 @@ export const authOptions: NextAuthOptions = {
               name: user.name,
               role: UserRole.USER,
               auth_provider: 'google',
-            })
+            } as any)
             .select()
-            .single();
+            .single() as { data: { id: string; role: string } | null; error: any };
 
           if (newProfile) {
             token.id = newProfile.id;

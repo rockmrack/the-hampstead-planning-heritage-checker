@@ -54,24 +54,25 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { lat, lng, projectType, radius } = body;
-    
+    const { lat, lng, projectType, propertyType, heritageStatus } = body;
+
     if (!projectType) {
       return NextResponse.json(
         { error: 'Missing required field: projectType' },
         { status: 400 }
       );
     }
-    
+
     // Get similar project precedents
-    const precedents = streetPrecedentService.getSimilarProjectPrecedents(
-      projectType,
+    const precedents = await streetPrecedentService.getSimilarProjectPrecedents(
       lat,
       lng,
-      radius || 500
+      projectType,
+      propertyType || 'house',
+      heritageStatus || 'GREEN'
     );
-    
-    return NextResponse.json({ precedents, count: precedents.length });
+
+    return NextResponse.json(precedents);
   } catch (error) {
     console.error('Street precedents error:', error);
     return NextResponse.json(

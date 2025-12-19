@@ -80,27 +80,34 @@ export async function GET(request: NextRequest) {
   // 2. Redis Check
   try {
     const redisStart = Date.now();
-    
+
     if (isRedisAvailable()) {
-      const redis = getRedisClient();
-      
-      // Test connection with PING
-      const pingResult = await redis.ping();
-      
-      checks['redis'] = {
-        status: pingResult === 'PONG' ? 'ok' : 'degraded',
-        latency: Date.now() - redisStart,
-      };
+      const redis = await getRedisClient();
 
-      // Deep check: test SET/GET operations
-      if (deep) {
-        const testKey = `health:${Date.now()}`;
-        await redis.set(testKey, 'test', 'EX', 5);
-        const testValue = await redis.get(testKey);
-        await redis.del(testKey);
+      if (redis) {
+        // Test connection with PING
+        const pingResult = await redis.ping();
 
-        checks['redis'].details = {
-          operations: testValue === 'test' ? 'ok' : 'error',
+        checks['redis'] = {
+          status: pingResult === 'PONG' ? 'ok' : 'degraded',
+          latency: Date.now() - redisStart,
+        };
+
+        // Deep check: test SET/GET operations
+        if (deep) {
+          const testKey = `health:${Date.now()}`;
+          await redis.set(testKey, 'test', { EX: 5 });
+          const testValue = await redis.get(testKey);
+          await redis.del(testKey);
+
+          checks['redis'].details = {
+            operations: testValue === 'test' ? 'ok' : 'error',
+          };
+        }
+      } else {
+        checks['redis'] = {
+          status: 'degraded',
+          message: 'Redis client not available',
         };
       }
     } else {

@@ -21,20 +21,33 @@ describe('StatusCard Component', () => {
 
   it('should render RED status card correctly', async () => {
     const { StatusCard } = await import('@/components/search/StatusCard');
-    
-    render(
-      <StatusCard
-        status="RED"
-        isListed={true}
-        listedBuildingGrade="II"
-        listedBuildingName="Test Listed Building"
-        inConservationArea={true}
-        conservationAreaName="Test Conservation Area"
-        hasArticle4={true}
-        address="10 Flask Walk, Hampstead"
-        onDownloadReport={jest.fn()}
-      />
-    );
+
+    const mockResult = {
+      status: 'RED' as const,
+      address: '10 Flask Walk, Hampstead',
+      coordinates: { latitude: 51.5574, longitude: -0.1782 },
+      postcode: 'NW3 1HJ',
+      borough: 'Camden',
+      listedBuilding: {
+        id: 1,
+        listEntryNumber: '1234567',
+        name: 'Test Listed Building',
+        grade: 'II' as const,
+        location: { type: 'Point' as const, coordinates: [-0.1782, 51.5574] },
+        hyperlink: 'https://historicengland.org.uk/listing/the-list/list-entry/1234567',
+      },
+      conservationArea: {
+        id: 1,
+        name: 'Test Conservation Area',
+        borough: 'Camden',
+        hasArticle4: true,
+      },
+      hasArticle4: true,
+      timestamp: new Date().toISOString(),
+      searchId: 'test-123',
+    };
+
+    render(<StatusCard result={mockResult} onDownloadPDF={jest.fn()} />);
 
     expect(screen.getByText(/Listed Building/i)).toBeInTheDocument();
     expect(screen.getByText(/Grade II/i)).toBeInTheDocument();
@@ -42,18 +55,25 @@ describe('StatusCard Component', () => {
 
   it('should render AMBER status card correctly', async () => {
     const { StatusCard } = await import('@/components/search/StatusCard');
-    
-    render(
-      <StatusCard
-        status="AMBER"
-        isListed={false}
-        inConservationArea={true}
-        conservationAreaName="Hampstead Conservation Area"
-        hasArticle4={true}
-        address="45 Flask Walk, Hampstead"
-        onDownloadReport={jest.fn()}
-      />
-    );
+
+    const mockResult = {
+      status: 'AMBER' as const,
+      address: '45 Flask Walk, Hampstead',
+      coordinates: { latitude: 51.5574, longitude: -0.1782 },
+      postcode: 'NW3 1HJ',
+      borough: 'Camden',
+      conservationArea: {
+        id: 1,
+        name: 'Hampstead Conservation Area',
+        borough: 'Camden',
+        hasArticle4: true,
+      },
+      hasArticle4: true,
+      timestamp: new Date().toISOString(),
+      searchId: 'test-456',
+    };
+
+    render(<StatusCard result={mockResult} onDownloadPDF={jest.fn()} />);
 
     expect(screen.getByText(/Conservation Area/i)).toBeInTheDocument();
     expect(screen.getByText(/Hampstead Conservation Area/i)).toBeInTheDocument();
@@ -61,38 +81,45 @@ describe('StatusCard Component', () => {
 
   it('should render GREEN status card correctly', async () => {
     const { StatusCard } = await import('@/components/search/StatusCard');
-    
-    render(
-      <StatusCard
-        status="GREEN"
-        isListed={false}
-        inConservationArea={false}
-        hasArticle4={false}
-        address="100 Cricklewood Lane"
-        onDownloadReport={jest.fn()}
-      />
-    );
+
+    const mockResult = {
+      status: 'GREEN' as const,
+      address: '100 Cricklewood Lane',
+      coordinates: { latitude: 51.5574, longitude: -0.1782 },
+      postcode: 'NW2 1AB',
+      hasArticle4: false,
+      timestamp: new Date().toISOString(),
+      searchId: 'test-789',
+    };
+
+    render(<StatusCard result={mockResult} onDownloadPDF={jest.fn()} />);
 
     expect(screen.getByText(/No Heritage Constraints/i)).toBeInTheDocument();
   });
 
-  it('should call onDownloadReport when download button is clicked', async () => {
+  it('should call onDownloadPDF when download button is clicked', async () => {
     const user = userEvent.setup();
     const mockDownload = jest.fn();
-    
+
     const { StatusCard } = await import('@/components/search/StatusCard');
-    
-    render(
-      <StatusCard
-        status="AMBER"
-        isListed={false}
-        inConservationArea={true}
-        conservationAreaName="Test Conservation Area"
-        hasArticle4={false}
-        address="Test Address"
-        onDownloadReport={mockDownload}
-      />
-    );
+
+    const mockResult = {
+      status: 'AMBER' as const,
+      address: 'Test Address',
+      coordinates: { latitude: 51.5574, longitude: -0.1782 },
+      postcode: 'NW3 1HJ',
+      conservationArea: {
+        id: 1,
+        name: 'Test Conservation Area',
+        borough: 'Camden',
+        hasArticle4: false,
+      },
+      hasArticle4: false,
+      timestamp: new Date().toISOString(),
+      searchId: 'test-999',
+    };
+
+    render(<StatusCard result={mockResult} onDownloadPDF={mockDownload} />);
 
     const downloadButton = screen.getByRole('button', { name: /download.*report/i });
     await user.click(downloadButton);

@@ -30,7 +30,7 @@ jest.mock('@/lib/utils/cache', () => ({
 
 // Import after mocks
 import { getSupabaseAdmin } from '@/lib/supabase';
-import { PropertyCheckService } from '@/lib/services/property-check';
+import { PropertyCheckService } from '@/services/property-check';
 
 describe('Property Check Integration', () => {
   let mockSupabase: jest.Mocked<Partial<SupabaseClient>>;
