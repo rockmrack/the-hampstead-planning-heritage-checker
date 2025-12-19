@@ -82,7 +82,7 @@ export async function GET(request: NextRequest) {
   try {
     const redisStart = Date.now();
 
-    if (isRedisAvailable()) {
+    if (await isRedisAvailable()) {
       const redis = await getRedisClient();
 
       if (redis) {
