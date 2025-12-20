@@ -9,16 +9,16 @@ import {
   PropertyContext, 
   ProjectSpecification 
 } from '@/lib/services/feasibility-engine';
-import { PROJECT_TYPES } from '@/lib/config/project-types';
 import { logger } from '@/lib/utils/logger';
-
-const PROJECT_TYPE_IDS = PROJECT_TYPES.map(pt => pt.id);
 
 export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID();
   
   try {
     const body = await request.json();
+    
+    // Import PROJECT_TYPE_IDS dynamically to avoid build-time loading
+    const { PROJECT_TYPE_IDS } = await import('@/lib/services/feasibility-engine');
     
     const {
       property,
@@ -89,6 +89,9 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET() {
+  // Import PROJECT_TYPE_IDS dynamically to avoid build-time loading
+  const { PROJECT_TYPE_IDS } = await import('@/lib/services/feasibility-engine');
+  
   return NextResponse.json({
     message: 'Feasibility Check API',
     version: '1.0.0',
