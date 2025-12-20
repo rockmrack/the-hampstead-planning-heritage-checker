@@ -7,6 +7,9 @@
  * @route POST /api/community-engagement
  */
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 import { NextRequest, NextResponse } from 'next/server';
 import communityEngagementService from '@/lib/services/community-engagement';
 
