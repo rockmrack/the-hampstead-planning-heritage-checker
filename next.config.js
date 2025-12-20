@@ -3,6 +3,14 @@ const nextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
 
+  // Set default env vars for build if not provided
+  env: {
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+    NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'placeholder-key',
+    NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || 'placeholder-token',
+  },
+
   // Ignore ESLint and TypeScript errors during build temporarily
   eslint: {
     ignoreDuringBuilds: true,
