@@ -146,7 +146,9 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] ?? 'http://localhost:3000'),
+  metadataBase: (process.env['NEXT_PUBLIC_APP_URL'] && process.env['NEXT_PUBLIC_APP_URL'] !== '') 
+    ? new URL(process.env['NEXT_PUBLIC_APP_URL']) 
+    : new URL('http://localhost:3000'),
   alternates: {
     canonical: '/',
   },
