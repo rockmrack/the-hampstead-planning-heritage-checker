@@ -10,7 +10,7 @@ import {
   ProjectSpecification 
 } from '@/lib/services/feasibility-engine';
 import { PROJECT_TYPE_IDS } from '@/lib/constants/project-types';
-import { logger } from '@/lib/utils/logger';
+// import { logger } from '@/lib/utils/logger';
 
 export async function POST(request: NextRequest) {
   const requestId = crypto.randomUUID();
@@ -48,22 +48,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    logger.info('Feasibility check requested', {
-      requestId,
-      projectType: project.projectType,
-      heritageStatus: property.heritageStatus,
-      borough: property.borough,
-    });
+    // logger.info('Feasibility check requested', {
+    //   requestId,
+    //   projectType: project.projectType,
+    //   heritageStatus: property.heritageStatus,
+    //   borough: property.borough,
+    // });
 
     // Perform feasibility assessment
     const report = assessFeasibility(property, project);
 
-    logger.info('Feasibility check completed', {
-      requestId,
-      projectAllowed: report.projectAllowed,
-      permissionRequired: report.permissionRequired,
-      approvalProbability: report.approvalPrediction?.approvalProbability,
-    });
+    // logger.info('Feasibility check completed', {
+    //   requestId,
+    //   projectAllowed: report.projectAllowed,
+    //   permissionRequired: report.permissionRequired,
+    //   approvalProbability: report.approvalPrediction?.approvalProbability,
+    // });
 
     return NextResponse.json({
       success: true,
@@ -71,10 +71,10 @@ export async function POST(request: NextRequest) {
       report,
     });
   } catch (error) {
-    logger.error('Feasibility check failed', {
-      requestId,
-      error: error instanceof Error ? error.message : 'Unknown error',
-    });
+    // logger.error('Feasibility check failed', {
+    //   requestId,
+    //   error: error instanceof Error ? error.message : 'Unknown error',
+    // });
 
     return NextResponse.json(
       { 
