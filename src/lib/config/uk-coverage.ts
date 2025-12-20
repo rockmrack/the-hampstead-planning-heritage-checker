@@ -634,7 +634,12 @@ export function calculateFees(
     'cleud': 'cleud',
   };
 
-  const applicationFee = lpa.fees[feeMap[applicationType]];
+  const feeKey = feeMap[applicationType];
+  if (!feeKey) {
+    throw new Error(`Unknown application type: ${applicationType}`);
+  }
+
+  const applicationFee = lpa.fees[feeKey];
   const listedBuildingFee = includeListedBuilding && applicationType !== 'listed-building' 
     ? lpa.fees.listedBuilding 
     : 0;
