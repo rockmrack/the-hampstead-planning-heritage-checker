@@ -3,19 +3,19 @@
  * Singleton pattern for Supabase client instances
  */
 
-import type { SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/database';
 
 // Check if we're in build time
 const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
 
-// Environment variables with validation - use placeholder during build
+// Environment variables - use valid placeholder URLs during build to prevent URL validation errors
 const supabaseUrl = isBuildTime 
   ? 'https://placeholder.supabase.co' 
   : (process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://placeholder.supabase.co');
 const supabaseAnonKey = isBuildTime 
-  ? 'placeholder-key' 
+  ? 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBsYWNlaG9sZGVyIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDUxOTI4MDAsImV4cCI6MTk2MDc2ODgwMH0.placeholder'
   : (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || 'placeholder-key');
 const supabaseServiceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
@@ -42,7 +42,7 @@ function validateEnvironment(): void {
  * Get the singleton Supabase client for browser/client-side use
  * Uses the anonymous key with Row Level Security (RLS)
  */
-export async function getSupabaseClient(): Promise<SupabaseClient<Database>> {
+export function getSupabaseClient(): SupabaseClient<Database> {
   if (isBuildTime) {
     // Return a mock client during build
     return null as any;
@@ -53,9 +53,6 @@ export async function getSupabaseClient(): Promise<SupabaseClient<Database>> {
   }
 
   validateEnvironment();
-
-  // Dynamic import to avoid loading Supabase during build
-  const { createClient } = await import('@supabase/supabase-js');
 
   supabaseClient = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
     auth: {
@@ -81,7 +78,7 @@ export async function getSupabaseClient(): Promise<SupabaseClient<Database>> {
  * Uses service role key to bypass RLS
  * NEVER expose this client to the browser
  */
-export async function getSupabaseAdmin(): Promise<SupabaseClient<Database>> {
+export function getSupabaseAdmin(): SupabaseClient<Database> {
   if (isBuildTime) {
     // Return a mock client during build
     return null as any;
@@ -97,9 +94,6 @@ export async function getSupabaseAdmin(): Promise<SupabaseClient<Database>> {
   if (!supabaseServiceRoleKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin operations');
   }
-
-  // Dynamic import to avoid loading Supabase during build
-  const { createClient } = await import('@supabase/supabase-js');
 
   supabaseAdminClient = createClient<Database>(supabaseUrl!, supabaseServiceRoleKey, {
     auth: {
