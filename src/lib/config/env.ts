@@ -7,12 +7,12 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // Supabase
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL'),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1, 'Supabase anon key is required'),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL').optional().or(z.literal('')),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional().or(z.literal('')),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   
   // Mapbox
-  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().min(1, 'Mapbox access token is required'),
+  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().optional().or(z.literal('')),
   MAPBOX_SECRET_TOKEN: z.string().optional(),
   
   // Application
