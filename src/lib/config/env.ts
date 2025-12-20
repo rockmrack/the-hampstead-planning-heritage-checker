@@ -7,7 +7,7 @@ import { z } from 'zod';
 
 const envSchema = z.object({
   // Supabase
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url('Invalid Supabase URL').optional().or(z.literal('')),
+  NEXT_PUBLIC_SUPABASE_URL: z.string().optional().or(z.literal('')),
   NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional().or(z.literal('')),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   
