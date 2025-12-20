@@ -39,7 +39,7 @@ export async function POST(request: NextRequest) {
       postcode,
       projectType,
       projectScale,
-      inConservationArea,
+      inConservationArea: Boolean(inConservationArea),
       nearListedBuilding,
       proposedUnits,
       existingCommunityRelations,

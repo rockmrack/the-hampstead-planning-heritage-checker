@@ -7,12 +7,18 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
+
 import constructionMethodology from '@/lib/services/construction-methodology';
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
-    const { address, postcode, projectType, projectDetails } = body;
+    const body = await request.json() as Record<string, unknown>;
+    const { address, postcode, projectType, projectDetails } = body as {
+      address?: string;
+      postcode?: string;
+      projectType?: string;
+      projectDetails?: Record<string, unknown>;
+    };
 
     if (!address || !postcode) {
       return NextResponse.json(
@@ -42,7 +48,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-export async function GET() {
+export function GET() {
   return NextResponse.json({
     service: 'Construction Methodology Statement',
     version: '1.0.0',
