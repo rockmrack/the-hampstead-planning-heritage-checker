@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
           search_lat: 51.5074,
           search_lng: -0.1278,
           radius_meters: 1,
-        } as never);
+        } as never) as { error: { message: string } | null };
 
         checks['database'].details = {
           postgis: postgisError ? 'error' : 'ok',
@@ -87,7 +87,7 @@ export async function GET(request: NextRequest) {
 
       if (redis) {
         // Test connection with PING
-        const pingResult = await redis.ping();
+        const pingResult = await (redis.ping() as Promise<string>);
 
         checks['redis'] = {
           status: pingResult === 'PONG' ? 'ok' : 'degraded',
@@ -97,9 +97,9 @@ export async function GET(request: NextRequest) {
         // Deep check: test SET/GET operations
         if (deep) {
           const testKey = `health:${Date.now()}`;
-          await redis.set(testKey, 'test', { EX: 5 });
-          const testValue = await redis.get(testKey);
-          await redis.del(testKey);
+          await (redis.set(testKey, 'test', { EX: 5 }) as Promise<string>);
+          const testValue = await (redis.get(testKey) as Promise<string | null>);
+          await (redis.del(testKey) as Promise<number>);
 
           checks['redis'].details = {
             operations: testValue === 'test' ? 'ok' : 'error',
