@@ -48,7 +48,39 @@ const envSchema = z.object({
 
 export type Env = z.infer<typeof envSchema>;
 
+let cachedEnv: Env | null = null;
+
 function getEnvVars(): Env {
+  // Skip during build
+  if (isBuildTime) {
+    return {
+      NEXT_PUBLIC_SUPABASE_URL: '',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+      SUPABASE_SERVICE_ROLE_KEY: '',
+      NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: '',
+      MAPBOX_SECRET_TOKEN: '',
+      NEXT_PUBLIC_APP_URL: 'http://localhost:3000',
+      NODE_ENV: 'production' as 'production',
+      RATE_LIMIT_MAX_REQUESTS: 60,
+      RATE_LIMIT_WINDOW_SECONDS: 60,
+      GEOCODING_CACHE_TTL: 86400,
+      PROPERTY_CHECK_CACHE_TTL: 3600,
+      SMTP_HOST: '',
+      SMTP_PORT: 0,
+      SMTP_USER: '',
+      SMTP_PASSWORD: '',
+      EMAIL_FROM: 'hello@hampsteadrenovations.co.uk',
+      NEXT_PUBLIC_GA_ID: '',
+      NEXT_PUBLIC_MIXPANEL_TOKEN: '',
+      NEXT_PUBLIC_SENTRY_DSN: '',
+      LOG_LEVEL: 'info' as 'info',
+    };
+  }
+  
+  if (cachedEnv) {
+    return cachedEnv;
+  }
+  
   // In development, we provide defaults for non-critical vars
   const rawEnv = {
     NEXT_PUBLIC_SUPABASE_URL: process.env['NEXT_PUBLIC_SUPABASE_URL'] ?? '',
@@ -74,10 +106,17 @@ function getEnvVars(): Env {
   };
 
   // Parse with schema to transform values
-  return envSchema.parse(rawEnv);
+  cachedEnv = envSchema.parse(rawEnv);
+  return cachedEnv;
 }
 
-export const env = getEnvVars();
+// Lazy initialization - only evaluate when accessed
+export const env = new Proxy({} as Env, {
+  get(_target, prop: string) {
+    const envVars = getEnvVars();
+    return envVars[prop as keyof Env];
+  }
+});
 
 /**
  * Validate environment variables on startup
