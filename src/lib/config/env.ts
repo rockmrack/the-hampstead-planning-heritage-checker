@@ -16,7 +16,7 @@ const envSchema = z.object({
   MAPBOX_SECRET_TOKEN: z.string().optional(),
   
   // Application
-  NEXT_PUBLIC_APP_URL: z.string().url().default('http://localhost:3000'),
+  NEXT_PUBLIC_APP_URL: z.string().optional().or(z.literal('')).default('http://localhost:3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   
   // Rate limiting
@@ -39,7 +39,7 @@ const envSchema = z.object({
   NEXT_PUBLIC_MIXPANEL_TOKEN: z.string().optional(),
   
   // Monitoring (optional)
-  NEXT_PUBLIC_SENTRY_DSN: z.string().url().optional(),
+  NEXT_PUBLIC_SENTRY_DSN: z.string().optional(),
   LOG_LEVEL: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 });
 
