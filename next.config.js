@@ -17,10 +17,6 @@ const nextConfig = {
   experimental: {
     // Optimize package imports for faster builds
     optimizePackageImports: ['lucide-react', 'framer-motion', '@heroicons/react'],
-    // Reduce build-time logging to prevent util.inspect errors
-    logging: {
-      level: 'error',
-    },
   },
 
   /**
