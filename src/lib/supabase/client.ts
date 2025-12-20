@@ -3,7 +3,7 @@
  * Singleton pattern for Supabase client instances
  */
 
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/database';
 
@@ -38,7 +38,7 @@ function validateEnvironment(): void {
  * Get the singleton Supabase client for browser/client-side use
  * Uses the anonymous key with Row Level Security (RLS)
  */
-export function getSupabaseClient(): SupabaseClient<Database> {
+export async function getSupabaseClient(): Promise<SupabaseClient<Database>> {
   if (isBuildTime) {
     // Return a mock client during build
     return null as any;
@@ -49,6 +49,9 @@ export function getSupabaseClient(): SupabaseClient<Database> {
   }
 
   validateEnvironment();
+
+  // Dynamic import to avoid loading Supabase during build
+  const { createClient } = await import('@supabase/supabase-js');
 
   supabaseClient = createClient<Database>(supabaseUrl!, supabaseAnonKey!, {
     auth: {
@@ -74,7 +77,7 @@ export function getSupabaseClient(): SupabaseClient<Database> {
  * Uses service role key to bypass RLS
  * NEVER expose this client to the browser
  */
-export function getSupabaseAdmin(): SupabaseClient<Database> {
+export async function getSupabaseAdmin(): Promise<SupabaseClient<Database>> {
   if (isBuildTime) {
     // Return a mock client during build
     return null as any;
@@ -90,6 +93,9 @@ export function getSupabaseAdmin(): SupabaseClient<Database> {
   if (!supabaseServiceRoleKey) {
     throw new Error('Missing SUPABASE_SERVICE_ROLE_KEY for admin operations');
   }
+
+  // Dynamic import to avoid loading Supabase during build
+  const { createClient } = await import('@supabase/supabase-js');
 
   supabaseAdminClient = createClient<Database>(supabaseUrl!, supabaseServiceRoleKey, {
     auth: {
