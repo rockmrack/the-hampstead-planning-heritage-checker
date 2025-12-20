@@ -120,7 +120,7 @@ export async function POST(request: NextRequest) {
       // Reconstruct PropertyCheckResult
       propertyResult = {
         status: data.status as PropertyCheckResult['status'],
-        address: data.search_address,
+        address: data.search_address ?? '',
         coordinates: {
           latitude: data.latitude ?? 0,
           longitude: data.longitude ?? 0,
@@ -128,10 +128,10 @@ export async function POST(request: NextRequest) {
         postcode: data.search_postcode ?? '',
         borough: data.borough,
         hasArticle4: data.has_article_4 ?? false,
-        timestamp: data.created_at,
-        searchId: data.id,
+        timestamp: data.created_at ?? new Date().toISOString(),
+        searchId: data.id ?? '',
         listedBuilding: data.listed_building_id ? {
-          id: data.listed_building_id,
+          id: Number(data.listed_building_id),
           listEntryNumber: data.list_entry_number ?? '',
           name: data.listed_building_name ?? '',
           grade: (data.listed_building_grade ?? 'II') as 'I' | 'II' | 'II*',
@@ -139,7 +139,7 @@ export async function POST(request: NextRequest) {
           hyperlink: '',
         } : null,
         conservationArea: data.conservation_area_id ? {
-          id: data.conservation_area_id,
+          id: Number(data.conservation_area_id),
           name: data.conservation_area_name ?? '',
           borough: data.borough ?? '',
           hasArticle4: data.has_article_4 ?? false,
