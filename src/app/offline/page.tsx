@@ -6,6 +6,7 @@
  */
 
 import Link from 'next/link';
+import { RetryButton } from '@/components/offline/RetryButton';
 
 export default function OfflinePage() {
   return (
@@ -174,13 +175,8 @@ export default function OfflinePage() {
 
         {/* Actions */}
         <div className="space-y-3">
-          <button
-            onClick={() => window.location.reload()}
-            className="w-full py-3 px-6 bg-primary-600 text-white rounded-lg font-medium hover:bg-primary-700 transition-colors"
-          >
-            Try Again
-          </button>
-          
+          <RetryButton />
+
           <Link
             href="/"
             className="block w-full py-3 px-6 bg-white text-slate-700 rounded-lg font-medium border border-slate-200 hover:bg-slate-50 transition-colors"

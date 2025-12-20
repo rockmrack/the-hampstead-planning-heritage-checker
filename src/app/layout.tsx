@@ -146,9 +146,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: (process.env['NEXT_PUBLIC_APP_URL'] && process.env['NEXT_PUBLIC_APP_URL'] !== '') 
-    ? new URL(process.env['NEXT_PUBLIC_APP_URL']) 
-    : new URL('http://localhost:3000'),
+  metadataBase: new URL(process.env['NEXT_PUBLIC_APP_URL'] || 'https://hampsteadrenovations.com'),
   alternates: {
     canonical: '/',
   },
