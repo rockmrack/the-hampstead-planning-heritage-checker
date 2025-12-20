@@ -11,7 +11,7 @@ import { getSupabaseAdmin } from '@/lib/supabase';
 import { logInfo, logError, startTimer } from '@/lib/utils/logger';
 import { checkRateLimitAsync, getClientIdentifier, DEFAULT_RATE_LIMIT } from '@/lib/utils/rate-limiter';
 import { cache, cacheTTL } from '@/lib/utils/cache';
-import { COMPANY_INFO, STATUS_CONFIG, LISTED_GRADES } from '@/lib/config';
+import { COMPANY_INFO, STATUS_CONFIG, LISTED_GRADES } from '@/lib/config/constants';
 import type { PropertyCheckResult } from '@/types';
 
 // Request validation schema
