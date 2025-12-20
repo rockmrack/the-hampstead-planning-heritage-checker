@@ -5,18 +5,27 @@
 
 import { z } from 'zod';
 
+// During build, allow empty strings. At runtime, require actual values.
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+
 const envSchema = z.object({
-  // Supabase
-  NEXT_PUBLIC_SUPABASE_URL: z.string().optional().or(z.literal('')),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().optional().or(z.literal('')),
+  // Supabase - required at runtime
+  NEXT_PUBLIC_SUPABASE_URL: isBuildTime 
+    ? z.string().optional().or(z.literal(''))
+    : z.string().url('Invalid Supabase URL').min(1, 'Supabase URL is required'),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: isBuildTime
+    ? z.string().optional().or(z.literal(''))
+    : z.string().min(1, 'Supabase Anon Key is required'),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   
-  // Mapbox
-  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().optional().or(z.literal('')),
+  // Mapbox - required at runtime
+  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: isBuildTime
+    ? z.string().optional().or(z.literal(''))
+    : z.string().min(1, 'Mapbox token is required'),
   MAPBOX_SECRET_TOKEN: z.string().optional(),
   
   // Application
-  NEXT_PUBLIC_APP_URL: z.string().optional().or(z.literal('')).default('http://localhost:3000'),
+  NEXT_PUBLIC_APP_URL: z.string().default('http://localhost:3000'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   
   // Rate limiting
