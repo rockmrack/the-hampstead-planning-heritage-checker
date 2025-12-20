@@ -41,30 +41,38 @@ export const dynamic = 'force-dynamic';
  * Generate metadata for SEO with dynamic street information
  */
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const streetData = await streetIntelligenceService.getStreetData(params.slug);
+  try {
+    const streetData = await streetIntelligenceService.getStreetData(params.slug);
 
-  if (!streetData) {
+    if (!streetData) {
+      return {
+        title: 'Street Not Found',
+      };
+    }
+
+    const canonicalUrl = `https://hampsteadrenovations.com/street/${params.slug}`;
+    const { analysis } = streetData;
+
     return {
-      title: 'Street Not Found',
+      title: `Planning Permission & Property History for ${streetData.name}, ${streetData.postcode}`,
+      description: `Detailed planning history, approval rates, and property insights for ${streetData.name} in ${streetData.borough}. See what neighbors have built.`,
+      alternates: {
+        canonical: canonicalUrl,
+      },
+      openGraph: {
+        title: `${streetData.name} - Planning & Heritage Guide`,
+        description: `${analysis.approvalRate.toFixed(0)}% approval rate. Average property value £${streetData.marketData?.averageSoldPrice1Year?.toLocaleString() ?? 'N/A'}. View planning history.`,
+        url: canonicalUrl,
+        type: 'article',
+      },
+    };
+  } catch (error) {
+    // Return basic metadata if data fetching fails during build
+    return {
+      title: 'Street Planning & Heritage Guide',
+      description: 'View planning history and property insights for streets in North West London.',
     };
   }
-
-  const canonicalUrl = `https://hampsteadrenovations.com/street/${params.slug}`;
-  const { analysis } = streetData;
-
-  return {
-    title: `Planning Permission & Property History for ${streetData.name}, ${streetData.postcode}`,
-    description: `Detailed planning history, approval rates, and property insights for ${streetData.name} in ${streetData.borough}. See what neighbors have built.`,
-    alternates: {
-      canonical: canonicalUrl,
-    },
-    openGraph: {
-      title: `${streetData.name} - Planning & Heritage Guide`,
-      description: `${analysis.approvalRate.toFixed(0)}% approval rate. Average property value £${streetData.marketData?.averageSoldPrice1Year?.toLocaleString() ?? 'N/A'}. View planning history.`,
-      url: canonicalUrl,
-      type: 'article',
-    },
-  };
 }
 
 /**
@@ -175,7 +183,14 @@ function generateStreetJsonLd(streetData: NonNullable<Awaited<ReturnType<typeof 
 }
 
 export default async function StreetPage({ params }: PageProps) {
-  const streetData = await streetIntelligenceService.getStreetData(params.slug);
+  let streetData;
+
+  try {
+    streetData = await streetIntelligenceService.getStreetData(params.slug);
+  } catch (error) {
+    // If data fetching fails during build, return not found
+    notFound();
+  }
 
   if (!streetData) {
     notFound();
