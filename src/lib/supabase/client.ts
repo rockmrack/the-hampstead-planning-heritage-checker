@@ -7,6 +7,9 @@ import { createClient, SupabaseClient } from '@supabase/supabase-js';
 
 import type { Database } from '@/types/database';
 
+// Check if we're in build time
+const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
+
 // Environment variables with validation
 const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
 const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
@@ -20,6 +23,9 @@ let supabaseAdminClient: SupabaseClient<Database> | null = null;
  * Validate environment at runtime
  */
 function validateEnvironment(): void {
+  if (isBuildTime) {
+    return; // Skip validation during build
+  }
   if (!supabaseUrl) {
     throw new Error('Missing NEXT_PUBLIC_SUPABASE_URL environment variable');
   }
@@ -33,6 +39,11 @@ function validateEnvironment(): void {
  * Uses the anonymous key with Row Level Security (RLS)
  */
 export function getSupabaseClient(): SupabaseClient<Database> {
+  if (isBuildTime) {
+    // Return a mock client during build
+    return null as any;
+  }
+  
   if (supabaseClient) {
     return supabaseClient;
   }
@@ -64,6 +75,11 @@ export function getSupabaseClient(): SupabaseClient<Database> {
  * NEVER expose this client to the browser
  */
 export function getSupabaseAdmin(): SupabaseClient<Database> {
+  if (isBuildTime) {
+    // Return a mock client during build
+    return null as any;
+  }
+  
   // Return existing singleton
   if (supabaseAdminClient) {
     return supabaseAdminClient;
