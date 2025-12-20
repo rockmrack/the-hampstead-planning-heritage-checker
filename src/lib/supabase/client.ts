@@ -10,9 +10,13 @@ import type { Database } from '@/types/database';
 // Check if we're in build time
 const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
 
-// Environment variables with validation
-const supabaseUrl = process.env['NEXT_PUBLIC_SUPABASE_URL'];
-const supabaseAnonKey = process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'];
+// Environment variables with validation - use placeholder during build
+const supabaseUrl = isBuildTime 
+  ? 'https://placeholder.supabase.co' 
+  : (process.env['NEXT_PUBLIC_SUPABASE_URL'] || 'https://placeholder.supabase.co');
+const supabaseAnonKey = isBuildTime 
+  ? 'placeholder-key' 
+  : (process.env['NEXT_PUBLIC_SUPABASE_ANON_KEY'] || 'placeholder-key');
 const supabaseServiceRoleKey = process.env['SUPABASE_SERVICE_ROLE_KEY'];
 
 // Singleton instances
