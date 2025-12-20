@@ -75,19 +75,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = requestSchema.safeParse(body);
+    const validation = requestSchema.safeParse(body) as { success: boolean; data?: z.infer<typeof requestSchema>; error?: z.ZodError };
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors[0]?.message ?? 'Invalid request',
+          error: validation.error?.errors[0]?.message ?? 'Invalid request',
           errorCode: ErrorCode.VALIDATION_ERROR,
         },
         { status: 400 }
       );
     }
 
-    const { address, postcode, coordinates: providedCoords } = validation.data;
+    const { address, postcode, coordinates: providedCoords } = validation.data!;
 
     // Get coordinates - either provided or via geocoding
     let coordinates = providedCoords;

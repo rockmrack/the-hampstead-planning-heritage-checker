@@ -57,19 +57,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = requestSchema.safeParse(body);
+    const validation = requestSchema.safeParse(body) as { success: boolean; data?: z.infer<typeof requestSchema>; error?: z.ZodError };
     if (!validation.success) {
       return NextResponse.json(
         { 
           success: false, 
-          error: validation.error.errors[0]?.message ?? 'Validation failed',
+          error: validation.error?.errors[0]?.message ?? 'Validation failed',
           errorCode: 'VALIDATION_ERROR',
         },
         { status: 400 }
       );
     }
 
-    const { searchId, email, format } = validation.data;
+    const { searchId, email, format } = validation.data!;
 
     // Check cache first
     const cacheKey = `report:${searchId}`;
@@ -87,7 +87,28 @@ export async function POST(request: NextRequest) {
         .from('search_logs')
         .select('*')
         .eq('id', searchId)
-        .single() as { data: any | null; error: any };
+        .single() as { 
+          data: {
+            status?: string;
+            timestamp?: string;
+            version?: string;
+            search_address?: string;
+            latitude?: number;
+            longitude?: number;
+            search_postcode?: string;
+            borough?: string;
+            has_article_4?: boolean;
+            created_at?: string;
+            id?: string;
+            listed_building_id?: string;
+            list_entry_number?: string;
+            listed_building_name?: string;
+            listed_building_grade?: string;
+            conservation_area_id?: string;
+            conservation_area_name?: string;
+          } | null;
+          error: { message?: string } | null;
+        };
 
       if (error || !data) {
         return NextResponse.json(

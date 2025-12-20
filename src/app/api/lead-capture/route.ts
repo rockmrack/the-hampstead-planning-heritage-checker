@@ -70,12 +70,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const validation = requestSchema.safeParse(body);
+    const validation = requestSchema.safeParse(body) as { success: boolean; data?: z.infer<typeof requestSchema>; error?: z.ZodError };
     if (!validation.success) {
       return NextResponse.json(
         {
           success: false,
-          error: validation.error.errors[0]?.message ?? 'Invalid request',
+          error: validation.error?.errors[0]?.message ?? 'Invalid request',
           errorCode: ErrorCode.VALIDATION_ERROR,
         },
         { status: 400 }
@@ -83,12 +83,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Capture the lead
-    const result = await captureLead(validation.data);
+    const result = await captureLead(validation.data!) as { success: boolean; error?: string };
 
     const duration = Date.now() - startTime;
     logRequest('POST', '/api/lead-capture', result.success ? 200 : 500, duration, {
       clientIp,
-      source: validation.data.source,
+      source: validation.data!.source,
     });
 
     if (!result.success) {
