@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         // Deep check: test SET/GET operations
         if (deep) {
           const testKey = `health:${Date.now()}`;
-          await (redis.set(testKey, 'test', { EX: 5 }) as Promise<string>);
+          await (redis.set(testKey, 'test', { EX: 5 }) as Promise<unknown>);
           const testValue = await (redis.get(testKey) as Promise<string | null>);
           await (redis.del(testKey) as Promise<number>);
 
