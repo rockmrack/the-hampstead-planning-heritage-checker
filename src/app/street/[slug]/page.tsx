@@ -22,11 +22,20 @@ interface PageProps {
  * Enables ISR (Incremental Static Regeneration) for optimal performance
  */
 export async function generateStaticParams(): Promise<Array<{ slug: string }>> {
+  // Return empty array during build to avoid database access
+  // Pages will be generated on-demand at runtime
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    return [];
+  }
+
   const slugs = getAllStreetSlugs();
   return slugs.map((slug) => ({
     slug,
   }));
 }
+
+// Enable dynamic rendering for this route
+export const dynamic = 'force-dynamic';
 
 /**
  * Generate metadata for SEO with dynamic street information
