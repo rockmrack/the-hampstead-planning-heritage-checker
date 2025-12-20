@@ -7,13 +7,7 @@ import { ProjectType, getProjectById, getRulesForProject, PDRule } from '../conf
 import { predictApproval, PredictionInput, PredictionResult } from './approval-prediction';
 
 // Define project type string constants for comparison
-const PROJECT_TYPE_IDS = {
-  SIDE_EXTENSION: 'side-extension',
-  LOFT_CONVERSION: 'loft-conversion',
-  BASEMENT: 'basement',
-  REAR_EXTENSION: 'rear-extension-single',
-  REAR_EXTENSION_DOUBLE: 'rear-extension-double',
-} as const;
+import { PROJECT_TYPE_IDS } from '@/lib/constants/project-types';
 
 // Extended PDRule with additional properties for feasibility checks
 interface PDRuleExtended extends Partial<PDRule> {
