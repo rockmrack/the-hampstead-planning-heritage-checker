@@ -7,6 +7,7 @@ import FeasibilityResults from '@/components/results/FeasibilityResults';
 import ProfessionalMarketplace from '@/components/marketplace/ProfessionalMarketplace';
 import { ProjectType } from '@/lib/config/project-types';
 import { FeasibilityReport, assessFeasibility, PropertyContext, ProjectSpecification } from '@/lib/services/feasibility-engine';
+import { safeLogError } from '@/lib/utils/safe-logger';
 
 // Dynamically import map to avoid SSR issues
 const MapComponent = dynamic(() => import('@/components/map/MapComponent'), {
@@ -84,7 +85,7 @@ export default function CanIPage() {
         setStep('project');
       }
     } catch (error) {
-      console.error('Search error:', error);
+      safeLogError('Search error:', error);
       // Demo fallback
       setPropertyData({
         address: searchQuery,
@@ -146,7 +147,7 @@ export default function CanIPage() {
       setFeasibilityReport(report);
       setStep('results');
     } catch (error) {
-      console.error('Feasibility check error:', error);
+      safeLogError('Feasibility check error:', error);
     }
 
     setIsLoading(false);

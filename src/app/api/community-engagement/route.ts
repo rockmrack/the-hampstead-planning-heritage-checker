@@ -49,7 +49,7 @@ export async function POST(request: NextRequest) {
     
     return NextResponse.json(strategy);
   } catch (error) {
-    console.error('Community engagement guidance error:', error);
+    safeLogError('Community engagement guidance error:', error);
     return NextResponse.json(
       { error: 'Failed to generate community engagement strategy' },
       { status: 500 }

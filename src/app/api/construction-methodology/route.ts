@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString()
     });
   } catch (error) {
-    console.error('Construction Methodology API error:', error);
+    safeLogError('Construction Methodology API error:', error);
     return NextResponse.json(
       { error: 'Failed to generate construction methodology statement' },
       { status: 500 }

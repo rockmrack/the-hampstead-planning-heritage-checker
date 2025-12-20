@@ -15,6 +15,7 @@ import { AddressSearch, StatusCard } from '@/components/search';
 import { LeadCaptureModal } from '@/components/forms';
 import { LoadingSpinner, ErrorBoundary } from '@/components/ui';
 import { generatePropertyReport, downloadPDF, generatePDFFilename } from '@/services/pdf-generator';
+import { safeLogError } from '@/lib/utils/safe-logger';
 import { COMPANY_INFO } from '@/lib/config';
 import type { GeocodingResult, PropertyCheckResult, PropertyStatus } from '@/types';
 
@@ -124,7 +125,7 @@ export default function HomePage() {
 
       toast.success('Report downloaded successfully!');
     } catch (error) {
-      console.error('PDF generation error:', error);
+      safeLogError('PDF generation error:', error);
       toast.error('Failed to generate report. Please try again.');
       throw error;
     } finally {
