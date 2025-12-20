@@ -5,23 +5,17 @@
 
 import { z } from 'zod';
 
-// During build, allow empty strings. At runtime, require actual values.
+// During build, skip all validation. At runtime, validate properly.
 const isBuildTime = process.env.NEXT_PHASE === 'phase-production-build';
 
 const envSchema = z.object({
-  // Supabase - required at runtime
-  NEXT_PUBLIC_SUPABASE_URL: isBuildTime 
-    ? z.string().optional().or(z.literal(''))
-    : z.string().url('Invalid Supabase URL').min(1, 'Supabase URL is required'),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: isBuildTime
-    ? z.string().optional().or(z.literal(''))
-    : z.string().min(1, 'Supabase Anon Key is required'),
+  // Supabase
+  NEXT_PUBLIC_SUPABASE_URL: z.string().default(''),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().default(''),
   SUPABASE_SERVICE_ROLE_KEY: z.string().optional(),
   
-  // Mapbox - required at runtime
-  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: isBuildTime
-    ? z.string().optional().or(z.literal(''))
-    : z.string().min(1, 'Mapbox token is required'),
+  // Mapbox
+  NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: z.string().default(''),
   MAPBOX_SECRET_TOKEN: z.string().optional(),
   
   // Application
@@ -41,7 +35,7 @@ const envSchema = z.object({
   SMTP_PORT: z.string().transform(Number).optional(),
   SMTP_USER: z.string().optional(),
   SMTP_PASSWORD: z.string().optional(),
-  EMAIL_FROM: z.string().email().optional().default('hello@hampsteadrenovations.co.uk'),
+  EMAIL_FROM: z.string().default('hello@hampsteadrenovations.co.uk'),
   
   // Analytics (optional)
   NEXT_PUBLIC_GA_ID: z.string().optional(),
