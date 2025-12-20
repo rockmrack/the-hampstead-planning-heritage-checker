@@ -77,7 +77,6 @@ export async function getRedisClient(): Promise<RedisClientType | null> {
       // Dynamically import redis module
       if (!redisModule) {
         try {
-          // @ts-expect-error - Redis module may not be installed
           redisModule = await import('redis');
         } catch {
           logger.warn('Redis module not installed, using in-memory fallback');
