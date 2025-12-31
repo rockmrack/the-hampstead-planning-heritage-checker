@@ -30,6 +30,7 @@ import {
   ExternalLink
 } from 'lucide-react';
 import type { PropertyCheckResult } from '@/types';
+import { withBasePath } from '@/lib/config/base-path';
 
 interface Message {
   id: string;
@@ -132,7 +133,7 @@ export function PlanningCopilot({
     setShowSuggestions(false);
 
     try {
-      const response = await fetch('/api/chat', {
+      const response = await fetch(withBasePath('/api/chat'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

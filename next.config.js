@@ -206,6 +206,26 @@ const nextConfig = {
    */
   async redirects() {
     return [
+      // When deployed with a basePath, ensure the deployment root doesn't 404
+      {
+        source: '/',
+        destination: '/heritage-check',
+        permanent: false,
+        basePath: false,
+      },
+      // Legacy entrypoints (unprefixed) -> basePath entry
+      {
+        source: '/check',
+        destination: '/heritage-check',
+        permanent: true,
+        basePath: false,
+      },
+      {
+        source: '/streets/:slug',
+        destination: '/heritage-check/street/:slug',
+        permanent: true,
+        basePath: false,
+      },
       // Redirect old URLs to new structure
       {
         source: '/check',
@@ -226,6 +246,7 @@ const nextConfig = {
   env: {
     NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN: process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN,
     NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'https://hampsteadrenovations.com',
+    NEXT_PUBLIC_BASE_PATH: '/heritage-check',
   },
 };
 

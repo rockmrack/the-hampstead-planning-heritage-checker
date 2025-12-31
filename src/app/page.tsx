@@ -17,6 +17,7 @@ import { LoadingSpinner, ErrorBoundary } from '@/components/ui';
 import { generatePropertyReport, downloadPDF, generatePDFFilename } from '@/services/pdf-generator';
 import { safeLogError } from '@/lib/utils/safe-logger';
 import { COMPANY_INFO } from '@/lib/config';
+import { withBasePath } from '@/lib/config/base-path';
 import type { GeocodingResult, PropertyCheckResult, PropertyStatus } from '@/types';
 
 // Dynamically import map to avoid SSR issues
@@ -44,7 +45,7 @@ export default function HomePage() {
     setSearchResult(null);
 
     try {
-      const response = await fetch('/api/check-property', {
+      const response = await fetch(withBasePath('/api/check-property'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ export default function HomePage() {
 
     try {
       // Capture the lead
-      await fetch('/api/lead-capture', {
+      await fetch(withBasePath('/api/lead-capture'), {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -416,7 +417,7 @@ export default function HomePage() {
             <a href={COMPANY_INFO.contact.phoneLink} className="btn-primary text-lg">
               Call {COMPANY_INFO.contact.phone}
             </a>
-            <a href="/consultation" className="btn-outline border-white text-white hover:bg-white hover:text-[#0F172A] text-lg">
+            <a href={withBasePath('/consultation')} className="btn-outline border-white text-white hover:bg-white hover:text-[#0F172A] text-lg">
               Book Consultation
             </a>
           </div>

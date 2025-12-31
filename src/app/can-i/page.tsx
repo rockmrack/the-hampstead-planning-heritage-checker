@@ -8,6 +8,7 @@ import ProfessionalMarketplace from '@/components/marketplace/ProfessionalMarket
 import { ProjectType } from '@/lib/config/project-types';
 import { FeasibilityReport, assessFeasibility, PropertyContext, ProjectSpecification } from '@/lib/services/feasibility-engine';
 import { safeLogError } from '@/lib/utils/safe-logger';
+import { withBasePath } from '@/lib/config/base-path';
 
 // Dynamically import map to avoid SSR issues
 const MapComponent = dynamic(() => import('@/components/map/MapComponent'), {
@@ -49,7 +50,7 @@ export default function CanIPage() {
     setIsLoading(true);
     try {
       // Call the existing property check API
-      const response = await fetch('/api/property-check', {
+      const response = await fetch(withBasePath('/api/property-check'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ address: searchQuery }),
@@ -403,14 +404,14 @@ export default function CanIPage() {
       <nav className="bg-white shadow-sm">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <a href="/" className="text-xl font-bold text-blue-600">
+            <a href={withBasePath('/')} className="text-xl font-bold text-blue-600">
               Heritage & Planning Engine
             </a>
             <div className="flex items-center gap-6">
-              <a href="/check" className="text-gray-600 hover:text-gray-900">Heritage Check</a>
-              <a href="/can-i" className="text-blue-600 font-medium">Can I Do This?</a>
-              <a href="/track" className="text-gray-600 hover:text-gray-900">Track Applications</a>
-              <a href="/alerts" className="text-gray-600 hover:text-gray-900">Alerts</a>
+              <a href={withBasePath('/check')} className="text-gray-600 hover:text-gray-900">Heritage Check</a>
+              <a href={withBasePath('/can-i')} className="text-blue-600 font-medium">Can I Do This?</a>
+              <a href={withBasePath('/track')} className="text-gray-600 hover:text-gray-900">Track Applications</a>
+              <a href={withBasePath('/alerts')} className="text-gray-600 hover:text-gray-900">Alerts</a>
             </div>
           </div>
         </div>

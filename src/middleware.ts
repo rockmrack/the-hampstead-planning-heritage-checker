@@ -7,6 +7,14 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
+const BASE_PATH = process.env['NEXT_PUBLIC_BASE_PATH'] || '';
+
+function stripBasePath(pathname: string): string {
+  if (!BASE_PATH) return pathname;
+  if (pathname === BASE_PATH) return '/';
+  return pathname.startsWith(`${BASE_PATH}/`) ? pathname.slice(BASE_PATH.length) : pathname;
+}
+
 // Routes that require authentication
 const protectedRoutes = [
   '/admin',
@@ -30,6 +38,7 @@ const publicApiRoutes = [
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const normalizedPathname = stripBasePath(pathname);
   
   // Get the token from the session
   const token = await getToken({
@@ -71,31 +80,31 @@ export async function middleware(request: NextRequest) {
 
   // Check protected routes
   const isProtectedRoute = protectedRoutes.some(route => 
-    pathname.startsWith(route)
+    normalizedPathname.startsWith(route)
   );
   
   const isAuthRoute = authRoutes.some(route => 
-    pathname.startsWith(route)
+    normalizedPathname.startsWith(route)
   );
 
   const isPublicApi = publicApiRoutes.some(route => 
-    pathname.startsWith(route)
+    normalizedPathname.startsWith(route)
   );
 
   // Redirect unauthenticated users from protected routes
   if (isProtectedRoute && !isAuthenticated) {
-    const signInUrl = new URL('/auth/signin', request.url);
+    const signInUrl = new URL(`${BASE_PATH}/auth/signin`, request.url);
     signInUrl.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(signInUrl);
   }
 
   // Redirect authenticated users from auth routes
   if (isAuthRoute && isAuthenticated) {
-    return NextResponse.redirect(new URL('/', request.url));
+    return NextResponse.redirect(new URL(`${BASE_PATH}/`, request.url));
   }
 
   // Admin route protection
-  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+  if (normalizedPathname.startsWith('/admin') || normalizedPathname.startsWith('/api/admin')) {
     if (!isAuthenticated) {
       return NextResponse.json(
         { success: false, error: 'Authentication required' },
@@ -106,13 +115,13 @@ export async function middleware(request: NextRequest) {
     // Check for admin role
     const userRole = token?.role as string;
     if (userRole !== 'admin' && userRole !== 'super_admin') {
-      if (pathname.startsWith('/api/')) {
+      if (normalizedPathname.startsWith('/api/')) {
         return NextResponse.json(
           { success: false, error: 'Insufficient permissions' },
           { status: 403 }
         );
       }
-      return NextResponse.redirect(new URL('/unauthorized', request.url));
+      return NextResponse.redirect(new URL(`${BASE_PATH}/unauthorized`, request.url));
     }
   }
 

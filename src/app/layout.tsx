@@ -4,6 +4,7 @@ import Script from 'next/script';
 
 import '@/styles/globals.css';
 import { Header, Footer } from '@/components/layout';
+import { withBasePath } from '@/lib/config/base-path';
 
 const inter = Inter({
   subsets: ['latin'],
@@ -228,7 +229,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="msapplication-TileColor" content="#1e3a5f" />
         <meta name="msapplication-tap-highlight" content="no" />
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/icon-192x192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href={withBasePath('/icons/icon-192x192.png')} />
       </head>
       <body className="min-h-screen flex flex-col antialiased">
         <Header />
@@ -242,7 +243,7 @@ export default function RootLayout({
             __html: `
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(
+                  navigator.serviceWorker.register('${withBasePath('/sw.js')}').then(
                     function(registration) {
                       console.log('ServiceWorker registration successful');
                     },
