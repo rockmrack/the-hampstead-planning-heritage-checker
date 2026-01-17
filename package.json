@@ -28,7 +28,7 @@
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
     "@mapbox/mapbox-gl-geocoder": "^5.0.2",
-    "@supabase/supabase-js": "^2.39.0",
+    "@supabase/supabase-js": "^2.89.0",
     "@turf/turf": "^6.5.0",
     "clsx": "^2.0.0",
     "date-fns": "^2.30.0",
