@@ -37,7 +37,7 @@
     "jspdf": "^3.0.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.302.0",
-    "mapbox-gl": "^3.0.1",
+    "mapbox-gl": "^3.17.0",
     "next": "14.2.35",
     "next-auth": "^4.24.5",
     "react": "^18.2.0",
